@@ -1,0 +1,44 @@
+<script setup lang="ts">
+const isVisible = ref(false)
+
+onMounted(() => {
+  window.addEventListener('scroll', checkScroll)
+})
+
+onUnmounted(() => {
+  window.removeEventListener('scroll', checkScroll)
+})
+
+function checkScroll() {
+  isVisible.value = window.scrollY > 400
+}
+
+function scrollToTop() {
+  window.scrollTo({ top: 0, behavior: 'smooth' })
+}
+</script>
+
+<template>
+  <Transition name="scroll-btn">
+    <button
+      v-if="isVisible"
+      @click="scrollToTop"
+      class="fixed bottom-8 right-8 z-30 w-12 h-12 rounded-full bg-ink-900 text-cream-50 flex items-center justify-center shadow-lg hover:bg-ink-700 transition-colors duration-300"
+      aria-label="Scroll to top"
+    >
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18" />
+      </svg>
+    </button>
+  </Transition>
+</template>
+
+<style scoped>
+.scroll-btn-enter-active { transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1); }
+.scroll-btn-leave-active { transition: all 0.2s ease; }
+.scroll-btn-enter-from,
+.scroll-btn-leave-to {
+  opacity: 0;
+  transform: translateY(16px);
+}
+</style>

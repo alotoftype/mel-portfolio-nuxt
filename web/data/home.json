@@ -1,0 +1,33 @@
+[
+    {
+        "slider": [
+            {
+                "id": 1,
+                "backgroundImage": "/img/hero-slider/hero1.png",
+                "title": "First Slider",
+                "subTitle": "lorem ipsum dolor sit amet.",
+                "desc": "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
+                "buttonText": "Explore now"
+            },
+            {
+                "id": 2,
+                "backgroundImage": "/img/hero-slider/hero2.png",
+                "title": "Second Slider",
+                "subTitle": "lorem ipsum dolor.",
+                "desc": "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
+                "buttonText": "Explore now"
+            },
+            {
+                "id": 3,
+                "backgroundImage": "/img/hero-slider/hero3.png",
+                "title": "Vouge Italia Deember Campaign",
+                "subTitle": "inspire 2026",
+                "desc": "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
+                "buttonText": "Explore now"
+            }
+        ]
+    },
+    {
+        "qute": "Melshotya Photography, based in the artistic hub of Brooklyn, specializes in capturing life's unforgettable moments with a unique blend of traditional and contemporary styles. Driven by passion and a keen eye for detail, they create compelling, emotionally rich photographs, turning fleeting instants into lasting memories."
+    }
+]

@@ -1,0 +1,169 @@
+<script setup lang="ts">
+const { getAboutData } = useSanityData()
+useScrollAnimation()
+
+const aboutData = await getAboutData()
+
+// Extract sections from the array-based local data
+const aboutMe = Array.isArray(aboutData)
+  ? aboutData.find((d: any) => d.id === 'about me')
+  : aboutData
+const aboutService = Array.isArray(aboutData)
+  ? aboutData.find((d: any) => d.id === 'about service')
+  : null
+const teamData = Array.isArray(aboutData)
+  ? aboutData.find((d: any) => d.id === 'team')
+  : null
+const blockquote = Array.isArray(aboutData)
+  ? aboutData.find((d: any) => d.id === 'blockquote')
+  : null
+const awards = Array.isArray(aboutData)
+  ? aboutData.find((d: any) => d.id === 'Awards')
+  : null
+const brands = Array.isArray(aboutData)
+  ? aboutData.find((d: any) => d.id === 'Brand')
+  : null
+
+function cleanHtml(text: string) {
+  if (!text) return ''
+  return text.replace(/<br\s*\/?>/g, '\n').replace(/<[^>]*>/g, '')
+}
+
+useHead({
+  title: 'About — MelShotya Photography',
+})
+</script>
+
+<template>
+  <div>
+    <!-- Page Header -->
+    <section class="pt-32 pb-16 md:pt-40 md:pb-20 px-6 md:px-10 lg:px-16 text-center">
+      <p class="text-xs uppercase tracking-widest-xl text-ink-400 font-body mb-4 animate-on-scroll">
+        Who We Are
+      </p>
+      <h1 class="font-display text-display-md md:text-display-lg text-ink-900 font-light animate-on-scroll">
+        {{ aboutMe?.title || 'About MelShotya' }}
+      </h1>
+    </section>
+
+    <!-- About intro -->
+    <section class="px-6 md:px-10 lg:px-16 pb-20 md:pb-28">
+      <div class="max-w-3xl mx-auto text-center animate-on-scroll">
+        <p
+          class="text-ink-600 font-body leading-relaxed text-base md:text-lg"
+          v-html="aboutMe?.excerpt"
+        />
+      </div>
+    </section>
+
+    <!-- Services -->
+    <section v-if="aboutService" class="px-6 md:px-10 lg:px-16 pb-20 md:pb-28">
+      <div class="max-w-4xl mx-auto">
+        <div class="divider mb-16" />
+        <h2 class="font-display text-2xl md:text-3xl text-ink-800 font-light mb-10 text-center animate-on-scroll">
+          {{ aboutService.title }}
+        </h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
+          <div
+            v-for="(service, i) in aboutService.pagelinkText"
+            :key="i"
+            class="text-center py-8 border border-ink-100 animate-on-scroll"
+            :style="{ animationDelay: `${i * 100}ms` }"
+          >
+            <p class="font-body text-sm text-ink-700">{{ service }}</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Testimonial -->
+    <section v-if="blockquote" class="py-20 md:py-28 bg-ink-950 text-cream-50 relative grain">
+      <div class="max-w-3xl mx-auto text-center px-6 md:px-10">
+        <svg class="w-8 h-8 mx-auto mb-8 text-accent opacity-50" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M14.017 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.995 2.151c-2.432.917-3.995 3.638-3.995 5.849h4v10h-9.983zm-14.017 0v-7.391c0-5.704 3.748-9.57 9-10.609l.996 2.151c-2.433.917-3.996 3.638-3.996 5.849h3.983v10h-9.983z"/>
+        </svg>
+        <blockquote class="font-display text-xl md:text-2xl lg:text-3xl font-light leading-relaxed italic text-cream-100" v-html="blockquote.excerpt" />
+        <div class="mt-8">
+          <p class="text-sm font-body text-cream-300">{{ blockquote.name }}</p>
+          <p class="text-xs font-body text-cream-400/60 mt-1">{{ blockquote.designation }}</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Team -->
+    <section v-if="teamData?.team" class="py-20 md:py-28 px-6 md:px-10 lg:px-16">
+      <div class="max-w-6xl mx-auto">
+        <div class="text-center mb-14">
+          <p class="text-xs uppercase tracking-widest-xl text-ink-400 font-body mb-3 animate-on-scroll">The People</p>
+          <h2 class="font-display text-2xl md:text-3xl text-ink-800 font-light animate-on-scroll">
+            {{ teamData.title }}
+          </h2>
+        </div>
+        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 md:gap-8">
+          <div
+            v-for="(member, i) in teamData.team"
+            :key="member.id"
+            class="text-center animate-on-scroll"
+            :style="{ animationDelay: `${i * 80}ms` }"
+          >
+            <div class="aspect-square overflow-hidden mb-4">
+              <img
+                :src="member.image"
+                :alt="cleanHtml(member.name)"
+                class="w-full h-full object-cover grayscale hover:grayscale-0 transition-all duration-600"
+                loading="lazy"
+              />
+            </div>
+            <h3 class="font-display text-lg text-ink-800" v-html="member.name" />
+            <p v-if="member.designation" class="text-xs text-ink-400 font-body mt-1">
+              {{ member.designation }}
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Awards -->
+    <section v-if="awards" class="py-20 md:py-28 px-6 md:px-10 lg:px-16 bg-cream-100">
+      <div class="max-w-4xl mx-auto">
+        <h2 class="font-display text-2xl md:text-3xl text-ink-800 font-light mb-12 text-center animate-on-scroll">
+          {{ awards.title }}
+        </h2>
+        <div class="divide-y divide-ink-200">
+          <div
+            v-for="award in awards.awardItem"
+            :key="award.id"
+            class="flex items-center justify-between py-5 animate-on-scroll"
+          >
+            <div>
+              <h3 class="font-body text-sm text-ink-700" v-html="award.title" />
+            </div>
+            <span class="text-xs uppercase tracking-widest-xl text-ink-400 font-body shrink-0 ml-4">
+              {{ award.cate }}
+            </span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Clients -->
+    <section v-if="brands" class="py-20 md:py-28 px-6 md:px-10 lg:px-16">
+      <div class="max-w-4xl mx-auto text-center">
+        <p class="text-xs uppercase tracking-widest-xl text-ink-400 font-body mb-3 animate-on-scroll">Trusted By</p>
+        <h2 class="font-display text-2xl md:text-3xl text-ink-800 font-light mb-4 animate-on-scroll">
+          {{ brands.title }}
+        </h2>
+        <p class="text-sm text-ink-500 font-body mb-12 animate-on-scroll">{{ brands.excerpt }}</p>
+        <div class="flex flex-wrap justify-center items-center gap-10 md:gap-16">
+          <div
+            v-for="brand in brands.brand"
+            :key="brand.id"
+            class="opacity-40 hover:opacity-80 transition-opacity duration-400 animate-on-scroll"
+          >
+            <img :src="brand.image" alt="Client logo" class="h-10 md:h-12 object-contain" loading="lazy" />
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+</template>

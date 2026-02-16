@@ -1,0 +1,23 @@
+[
+    {
+        "id": 1,
+        "delay": "300",
+        "title": "Contact Directly",
+        "icon": "icon_mail_alt",
+        "info": "<a href='mailto:melshotya@gmail.com'>melshotya@gmail.com</a><br /><a href='tel:3472657024'>3472657024</a>"
+    },
+    {
+        "id": 2,
+        "aos-delay": "600",
+        "title": "Visit our office",
+        "icon": "icon_pin_alt",
+        "info": "<p>155 maidenlane Maiden Lane, New York, United States</p>"
+    },
+    {
+        "id": 3,
+        "aos-delay": "900",
+        "title": "Contact Directly",
+        "icon": "icon_briefcase",
+        "info": "<p>Send your CV to our email: <a href='mailto:melshotya@gmail.com'>melshotya@gmail.com</a></p>"
+    }
+]
