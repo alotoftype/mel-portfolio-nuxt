@@ -7,11 +7,16 @@ export default defineNuxtConfig({
 
   image: {
     quality: 80,
-    formats: ["webp", "avif"],
-    sanity: {
-      projectId: process.env.SANITY_PROJECT_ID || "your-project-id",
-      dataset: process.env.SANITY_DATASET || "production",
+    formats: ["webp"],
+    screens: {
+      xs: 320,
+      sm: 640,
+      md: 768,
+      lg: 1024,
+      xl: 1280,
+      xxl: 1536,
     },
+    domains: ['cdn.sanity.io'],
   },
 
   app: {

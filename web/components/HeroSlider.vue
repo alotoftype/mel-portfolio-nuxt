@@ -68,12 +68,19 @@ onUnmounted(() => {
       class="absolute inset-0 transition-opacity duration-1000 ease-expo-out"
       :class="currentSlide === index ? 'opacity-100 z-10' : 'opacity-0 z-0'"
     >
-      <img
+      <NuxtImg
         :src="slide.image"
         :alt="slide.title"
         class="w-full h-full object-cover"
         :class="currentSlide === index ? 'scale-100' : 'scale-105'"
         style="transition: transform 6s cubic-bezier(0.16, 1, 0.3, 1);"
+        width="1920"
+        height="1080"
+        format="webp"
+        quality="85"
+        :loading="index === 0 ? 'eager' : 'lazy'"
+        :preload="index === 0"
+        densities="x1 x2"
       />
       <!-- Dark gradient overlay -->
       <div class="absolute inset-0 bg-gradient-to-t from-ink-950/70 via-ink-950/20 to-transparent" />

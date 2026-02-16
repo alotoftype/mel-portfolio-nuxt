@@ -91,11 +91,17 @@ function setFilter(filter: string) {
         :style="{ animationDelay: `${index * 60}ms` }"
         @click="openLightbox(item.homeImage, item.title)"
       >
-        <img
+        <NuxtImg
           :src="item.homeImage"
           :alt="item.title"
           class="w-full h-full object-cover transition-transform duration-800 ease-expo-out group-hover:scale-105"
+          width="600"
+          height="800"
+          format="webp"
+          quality="80"
           loading="lazy"
+          sizes="xs:100vw sm:50vw md:33vw lg:25vw"
+          densities="x1 x2"
         />
         <div class="portfolio-overlay" />
         <div class="portfolio-info absolute bottom-0 left-0 right-0 p-5 z-10">

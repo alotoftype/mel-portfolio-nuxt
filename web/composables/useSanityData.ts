@@ -25,36 +25,44 @@ export function useSanityData() {
    * Fetch portfolio items from Sanity, or fall back to local JSON
    */
   async function getPortfolioItems() {
-    if (isSanityConfigured && sanityClient) {
-      try {
-        const query = `*[_type == "portfolioItem"] | order(order asc) {
-          _id,
-          title,
-          "slug": slug.current,
-          excerpt,
-          categories,
-          "homeImage": homeImage.asset->url,
-          client,
-          date,
-          team,
-          services,
-          body,
-          gallery[] { asset->{ url } }
-        }`
-        const data = await sanityClient.fetch(query)
-        if (data?.length) {
-          return data
+    // Use Nuxt's built-in caching
+    const { data } = await useAsyncData('portfolio-items', async () => {
+      if (isSanityConfigured && sanityClient) {
+        try {
+          const query = `*[_type == "portfolioItem"] | order(order asc) {
+            _id,
+            title,
+            "slug": slug.current,
+            excerpt,
+            categories,
+            "homeImage": homeImage.asset->url,
+            client,
+            date,
+            team,
+            services,
+            body,
+            gallery[] { asset->{ url } }
+          }`
+          const result = await sanityClient.fetch(query)
+          if (result?.length) {
+            return result
+          }
+        } catch (e) {
+          console.warn('Sanity fetch failed, using local data:', e)
         }
-      } catch (e) {
-        console.warn('Sanity fetch failed, using local data:', e)
       }
-    }
-    // Fallback: map local JSON to consistent shape
-    return portfolioData.map((item: any) => ({
-      ...item,
-      homeImage: `/${item.homeImage}`,
-      slug: String(item.id),
-    }))
+      // Fallback: map local JSON to consistent shape
+      return portfolioData.map((item: any) => ({
+        ...item,
+        homeImage: `/${item.homeImage}`,
+        slug: String(item.id),
+      }))
+    }, {
+      // Cache for 5 minutes
+      getCachedData: (key) => nuxtApp.payload.data[key] || nuxtApp.static.data[key]
+    })
+
+    return data.value || []
   }
 
   /**
@@ -98,32 +106,33 @@ export function useSanityData() {
    * Fetch homepage data (slider, quote)
    */
   async function getHomeData() {
-    if (isSanityConfigured && sanityClient) {
-      try {
-        const query = `*[_type == "homePage"][0] {
-          slider[] {
-            _key,
-            title,
-            subtitle,
-            description,
-            "image": image.asset->url,
-            buttonText,
-            link
-          },
-          quote,
-          ctaTitle,
-          ctaSubtitle
-        }`
-        const data = await sanityClient.fetch(query)
-        if (data && data.slider) {
-          return data
+    const { data } = await useAsyncData('home-data', async () => {
+      if (isSanityConfigured && sanityClient) {
+        try {
+          const query = `*[_type == "homePage"][0] {
+            slider[] {
+              _key,
+              title,
+              subtitle,
+              description,
+              "image": image.asset->url,
+              buttonText,
+              link
+            },
+            quote,
+            ctaTitle,
+            ctaSubtitle
+          }`
+          const result = await sanityClient.fetch(query)
+          if (result && result.slider) {
+            return result
+          }
+        } catch (e) {
+          console.warn('Sanity fetch failed, using local data:', e)
         }
-      } catch (e) {
-        console.warn('Sanity fetch failed, using local data:', e)
       }
-    }
-    return {
-      slider: (homeData[0] as any).slider.map((s: any) => ({
+      return {
+        slider: (homeData[0] as any).slider.map((s: any) => ({
         title: s.title,
         subtitle: s.subTitle,
         image: s.backgroundImage,
@@ -132,16 +141,11 @@ export function useSanityData() {
       })),
       quote: (homeData[1] as any).qute,
     }
-    return {
-      slider: (homeData[0] as any).slider.map((s: any) => ({
-        title: s.title,
-        subtitle: s.subTitle,
-        image: s.backgroundImage,
-        buttonText: s.buttonText,
-        link: '/portfolio',
-      })),
-      quote: (homeData[1] as any).qute,
-    }
+    }, {
+      getCachedData: (key) => nuxtApp.payload.data[key] || nuxtApp.static.data[key]
+    })
+
+    return data.value || { slider: [], quote: '' }
   }
 
   /**
