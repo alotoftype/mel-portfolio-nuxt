@@ -38,10 +38,16 @@ function cleanHtml(text: string) {
   <div v-if="item">
     <!-- Hero image -->
     <section class="relative h-[60vh] md:h-[75vh] overflow-hidden">
-      <img
+      <NuxtImg
         :src="item.homeImage"
         :alt="item.title"
         class="w-full h-full object-cover"
+        width="1920"
+        height="1200"
+        format="webp"
+        quality="85"
+        loading="eager"
+        densities="x1 x2"
       />
       <div class="absolute inset-0 bg-gradient-to-t from-ink-950/60 via-transparent to-transparent" />
       <div class="absolute bottom-0 left-0 right-0 p-6 md:p-10 lg:p-16">
@@ -110,11 +116,17 @@ function cleanHtml(text: string) {
             :class="i === 0 ? 'md:col-span-2 aspect-video' : 'aspect-[4/3]'"
             @click="useLightbox().openLightbox(img, `${item.title} — ${i + 1}`)"
           >
-            <img
+            <NuxtImg
               :src="img"
               :alt="`${item.title} gallery image ${i + 1}`"
               class="w-full h-full object-cover transition-transform duration-800 ease-expo-out group-hover:scale-105"
+              :width="i === 0 ? 1200 : 800"
+              :height="i === 0 ? 675 : 600"
+              format="webp"
+              quality="85"
               loading="lazy"
+              :sizes="i === 0 ? 'xs:100vw md:66vw' : 'xs:100vw md:33vw'"
+              densities="x1 x2"
             />
           </div>
         </div>

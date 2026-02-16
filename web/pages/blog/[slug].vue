@@ -52,10 +52,16 @@ useHead({
   <div v-if="post">
     <!-- Hero -->
     <section class="relative h-[50vh] md:h-[65vh] overflow-hidden">
-      <img
+      <NuxtImg
         :src="thumbnailImage"
         :alt="post.title"
         class="w-full h-full object-cover"
+        width="1920"
+        height="1080"
+        format="webp"
+        quality="85"
+        loading="eager"
+        densities="x1 x2"
       />
       <div class="absolute inset-0 bg-gradient-to-t from-ink-950/70 via-ink-950/30 to-transparent" />
       <div class="absolute bottom-0 left-0 right-0 p-6 md:p-10 lg:p-16">
@@ -94,11 +100,17 @@ useHead({
           class="shrink-0 w-[80vw] md:w-[45vw] lg:w-[30vw] snap-center cursor-pointer"
           @click="useLightbox().openLightbox(img, `${post.title} — ${i + 1}`)"
         >
-          <img
+          <NuxtImg
             :src="img"
             :alt="`${post.title} image ${i + 1}`"
             class="w-full aspect-[3/2] object-cover"
+            width="800"
+            height="533"
+            format="webp"
+            quality="85"
             loading="lazy"
+            sizes="xs:80vw md:45vw lg:30vw"
+            densities="x1 x2"
           />
         </div>
       </div>
@@ -181,11 +193,17 @@ useHead({
               :to="`/blog/${related.slug || related.id}`"
               class="block overflow-hidden aspect-[4/3] mb-4"
             >
-              <img
+              <NuxtImg
                 :src="related.thumbnail || related.media?.images || related.sliderThumb?.[0]?.image || '/img/blog/01.jpg'"
                 :alt="related.title"
                 class="w-full h-full object-cover transition-transform duration-600 ease-expo-out group-hover:scale-105"
+                width="600"
+                height="450"
+                format="webp"
+                quality="80"
                 loading="lazy"
+                sizes="xs:100vw md:33vw"
+                densities="x1 x2"
               />
             </NuxtLink>
             <NuxtLink :to="`/blog/${related.slug || related.id}`">

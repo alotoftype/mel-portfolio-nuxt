@@ -107,11 +107,17 @@ useHead({
             :style="{ animationDelay: `${i * 80}ms` }"
           >
             <div class="aspect-square overflow-hidden mb-4">
-              <img
+              <NuxtImg
                 :src="member.image"
                 :alt="cleanHtml(member.name)"
                 class="w-full h-full object-cover grayscale hover:grayscale-0 transition-all duration-600"
+                width="400"
+                height="400"
+                format="webp"
+                quality="85"
                 loading="lazy"
+                sizes="xs:100vw sm:50vw md:33vw lg:25vw"
+                densities="x1 x2"
               />
             </div>
             <h3 class="font-display text-lg text-ink-800" v-html="member.name" />
@@ -160,7 +166,17 @@ useHead({
             :key="brand.id"
             class="opacity-40 hover:opacity-80 transition-opacity duration-400 animate-on-scroll"
           >
-            <img :src="brand.image" alt="Client logo" class="h-10 md:h-12 object-contain" loading="lazy" />
+            <NuxtImg
+              :src="brand.image"
+              alt="Client logo"
+              class="h-10 md:h-12 object-contain"
+              width="200"
+              height="48"
+              format="webp"
+              quality="90"
+              loading="lazy"
+              fit="contain"
+            />
           </div>
         </div>
       </div>

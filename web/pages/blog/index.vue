@@ -34,11 +34,17 @@ useHead({
         >
           <!-- Thumbnail -->
           <NuxtLink :to="`/blog/${post.slug || post.id}`" class="block overflow-hidden aspect-[4/3] mb-5">
-            <img
+            <NuxtImg
               :src="post.thumbnail || post.media?.images || post.sliderThumb?.[0]?.image || '/img/blog/01.jpg'"
               :alt="post.title"
               class="w-full h-full object-cover transition-transform duration-800 ease-expo-out group-hover:scale-105"
+              width="800"
+              height="600"
+              format="webp"
+              quality="80"
               loading="lazy"
+              sizes="xs:100vw sm:50vw md:33vw"
+              densities="x1 x2"
             />
           </NuxtLink>
 
