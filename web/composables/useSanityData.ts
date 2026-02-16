@@ -42,7 +42,9 @@ export function useSanityData() {
           gallery[] { asset->{ url } }
         }`
         const data = await sanityClient.fetch(query)
-        if (data?.length) return data
+        if (data?.length) {
+          return data
+        }
       } catch (e) {
         console.warn('Sanity fetch failed, using local data:', e)
       }
@@ -113,10 +115,22 @@ export function useSanityData() {
           ctaSubtitle
         }`
         const data = await sanityClient.fetch(query)
-        if (data) return data
+        if (data && data.slider) {
+          return data
+        }
       } catch (e) {
         console.warn('Sanity fetch failed, using local data:', e)
       }
+    }
+    return {
+      slider: (homeData[0] as any).slider.map((s: any) => ({
+        title: s.title,
+        subtitle: s.subTitle,
+        image: s.backgroundImage,
+        buttonText: s.buttonText,
+        link: '/portfolio',
+      })),
+      quote: (homeData[1] as any).qute,
     }
     return {
       slider: (homeData[0] as any).slider.map((s: any) => ({
