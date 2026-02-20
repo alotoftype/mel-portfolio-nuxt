@@ -80,7 +80,7 @@ onUnmounted(() => {
         quality="85"
         :loading="index === 0 ? 'eager' : 'lazy'"
         :preload="index === 0"
-        densities="x1 x2"
+        densities="x1"
       />
       <!-- Dark gradient overlay -->
       <div class="absolute inset-0 bg-gradient-to-t from-ink-950/70 via-ink-950/20 to-transparent" />

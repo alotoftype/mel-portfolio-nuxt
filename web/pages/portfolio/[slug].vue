@@ -47,7 +47,7 @@ function cleanHtml(text: string) {
         format="webp"
         quality="85"
         loading="eager"
-        densities="x1 x2"
+        densities="x1"
       />
       <div class="absolute inset-0 bg-gradient-to-t from-ink-950/60 via-transparent to-transparent" />
       <div class="absolute bottom-0 left-0 right-0 p-6 md:p-10 lg:p-16">
@@ -126,7 +126,7 @@ function cleanHtml(text: string) {
               quality="85"
               loading="lazy"
               :sizes="i === 0 ? 'xs:100vw md:66vw' : 'xs:100vw md:33vw'"
-              densities="x1 x2"
+              densities="x1"
             />
           </div>
         </div>

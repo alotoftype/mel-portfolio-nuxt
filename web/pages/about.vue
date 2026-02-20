@@ -117,7 +117,7 @@ useHead({
                 quality="85"
                 loading="lazy"
                 sizes="xs:100vw sm:50vw md:33vw lg:25vw"
-                densities="x1 x2"
+                densities="x1"
               />
             </div>
             <h3 class="font-display text-lg text-ink-800" v-html="member.name" />

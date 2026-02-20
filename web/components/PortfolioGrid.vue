@@ -101,7 +101,7 @@ function setFilter(filter: string) {
           quality="80"
           loading="lazy"
           sizes="xs:100vw sm:50vw md:33vw lg:25vw"
-          densities="x1 x2"
+          densities="x1"
         />
         <div class="portfolio-overlay" />
         <div class="portfolio-info absolute bottom-0 left-0 right-0 p-5 z-10">

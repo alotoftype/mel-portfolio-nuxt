@@ -61,7 +61,7 @@ useHead({
         format="webp"
         quality="85"
         loading="eager"
-        densities="x1 x2"
+        densities="x1"
       />
       <div class="absolute inset-0 bg-gradient-to-t from-ink-950/70 via-ink-950/30 to-transparent" />
       <div class="absolute bottom-0 left-0 right-0 p-6 md:p-10 lg:p-16">
@@ -110,7 +110,7 @@ useHead({
             quality="85"
             loading="lazy"
             sizes="xs:80vw md:45vw lg:30vw"
-            densities="x1 x2"
+            densities="x1"
           />
         </div>
       </div>
@@ -203,7 +203,7 @@ useHead({
                 quality="80"
                 loading="lazy"
                 sizes="xs:100vw md:33vw"
-                densities="x1 x2"
+                densities="x1"
               />
             </NuxtLink>
             <NuxtLink :to="`/blog/${related.slug || related.id}`">

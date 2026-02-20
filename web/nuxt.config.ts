@@ -1,11 +1,20 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
+const isDev = process.env.NODE_ENV !== "production";
+const usePolling = process.env.CHOKIDAR_USEPOLLING === "true";
+
 export default defineNuxtConfig({
   compatibilityDate: "2024-11-01",
   devtools: { enabled: false },
+  dir: {
+    public: "../public",
+  },
 
-  modules: ["@nuxt/image", "@nuxtjs/tailwindcss"],
+  modules: ["@nuxt/image", "@nuxtjs/tailwindcss", "@nuxt/eslint"],
 
   image: {
+    // `none` in dev makes local interaction faster by skipping on-the-fly IPX transforms.
+    // Override with `NUXT_IMAGE_PROVIDER=ipx` when you need to test transformed images locally.
+    provider: process.env.NUXT_IMAGE_PROVIDER || (isDev ? "none" : "ipx"),
     quality: 80,
     formats: ["webp"],
     screens: {
@@ -57,6 +66,8 @@ export default defineNuxtConfig({
     public: {
       sanityProjectId: process.env.SANITY_PROJECT_ID || "your-project-id",
       sanityDataset: process.env.SANITY_DATASET || "production",
+      sanityForceFallback: process.env.SANITY_FORCE_FALLBACK === "true",
+      sanityFetchTimeoutMs: Number(process.env.SANITY_FETCH_TIMEOUT_MS || 1200),
     },
   },
 
@@ -87,8 +98,8 @@ export default defineNuxtConfig({
     },
     server: {
       watch: {
-        usePolling: true,
-        interval: 1000,
+        usePolling,
+        interval: usePolling ? 1000 : undefined,
         ignored: [
           "**/node_modules/**",
           "**/.git/**",

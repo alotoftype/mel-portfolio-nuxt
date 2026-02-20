@@ -12,6 +12,11 @@ mel-portfolio-nuxt/
 
 ## Getting Started
 
+### Prerequisites
+
+- Node.js `>= 22.9.0` (or Node `24.x`)
+- npm `>= 10`
+
 ### Install Dependencies
 
 ```bash
@@ -65,9 +70,25 @@ Each project has its own `.env` file:
 
 See `.env.example` files in each directory for required variables.
 
+If you want the frontend to run fully offline (without reaching Sanity), set:
+
+```bash
+# web/.env
+SANITY_FORCE_FALLBACK=true
+```
+
+For faster local interaction, you can also set:
+
+```bash
+# web/.env
+SANITY_FETCH_TIMEOUT_MS=1200
+NUXT_IMAGE_PROVIDER=none
+CHOKIDAR_USEPOLLING=false
+```
+
 ### Documentation
 
-- 📘 [**Complete Development Guide**](./DEVELOPMENT-GUIDE.md) - Comprehensive documentation
+- 📘 [**Complete Development Guide**](./docs/DEVELOPMENT-GUIDE.md) - Comprehensive documentation
 - 🖼️ [**Image Upload Guide**](./sanity/IMAGE-UPLOAD-GUIDE.md) - Managing images in Sanity
 
 ### Sanity Management Scripts

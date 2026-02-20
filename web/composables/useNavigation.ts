@@ -1,6 +1,8 @@
 /**
  * Composable for fetching navigation data from Sanity
  */
+import { sanityFetchWithTimeout } from '~/composables/useSanityFetch'
+import { canUseSanityInProcess, handleSanityFetchError } from '~/composables/useSanityFallback'
 
 export interface NavigationItem {
   label: string
@@ -21,14 +23,16 @@ export interface Navigation {
 export function useNavigation() {
   const nuxtApp = useNuxtApp()
   const config = useRuntimeConfig()
-  const isSanityConfigured = config.public.sanityProjectId !== 'your-project-id'
+  const isSanityConfigured =
+    !config.public.sanityForceFallback &&
+    config.public.sanityProjectId !== 'your-project-id'
   const sanityClient = nuxtApp.$sanityClient
 
   /**
    * Fetch all navigation areas
    */
   async function getAllNavigation(): Promise<Navigation[]> {
-    if (isSanityConfigured && sanityClient) {
+    if (isSanityConfigured && sanityClient && canUseSanityInProcess()) {
       try {
         const query = `*[_type == "navigation" && enabled == true] {
           _id,
@@ -43,10 +47,10 @@ export function useNavigation() {
           showFullSocialNames,
           enabled
         }`
-        const data = await sanityClient.fetch(query)
+        const data = await sanityFetchWithTimeout<Navigation[]>(sanityClient, query)
         if (data?.length) return data
       } catch (e) {
-        console.warn('Navigation fetch failed:', e)
+        handleSanityFetchError('Fetching all navigation', e)
       }
     }
 
@@ -60,7 +64,7 @@ export function useNavigation() {
   async function getNavigationByLocation(
     location: Navigation['location']
   ): Promise<Navigation | null> {
-    if (isSanityConfigured && sanityClient) {
+    if (isSanityConfigured && sanityClient && canUseSanityInProcess()) {
       try {
         const query = `*[_type == "navigation" && location == $location && enabled == true][0] {
           _id,
@@ -75,10 +79,10 @@ export function useNavigation() {
           showFullSocialNames,
           enabled
         }`
-        const data = await sanityClient.fetch(query, { location })
+        const data = await sanityFetchWithTimeout<Navigation | null>(sanityClient, query, { location })
         if (data) return data
       } catch (e) {
-        console.warn(`Navigation fetch failed for ${location}:`, e)
+        handleSanityFetchError(`Fetching navigation for ${location}`, e)
       }
     }
 

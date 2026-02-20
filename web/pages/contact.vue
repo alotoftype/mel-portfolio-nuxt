@@ -19,7 +19,7 @@ async function handleSubmit() {
   try {
     // POST to getform.io (same endpoint as original project)
     const response = await fetch(
-      'https://getform.io/f/a17a2715-d7ee-4ac4-8fcb-12f1eed43b2c',
+      contactData.formEndpoint,
       {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -58,7 +58,7 @@ useHead({
         Contact
       </h1>
       <p class="max-w-xl mx-auto mt-6 text-ink-500 font-body text-sm leading-relaxed animate-on-scroll">
-        Contact us for any further questions, possible projects &amp; business partnerships.
+        {{ contactData.title }}
       </p>
     </section>
 
@@ -66,7 +66,7 @@ useHead({
     <section class="px-6 md:px-10 lg:px-16 pb-16 md:pb-20">
       <div class="max-w-4xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8">
         <div
-          v-for="(item, i) in contactData"
+          v-for="(item, i) in contactData.contactItems"
           :key="item.id"
           class="text-center py-10 px-6 border border-ink-100 animate-on-scroll"
           :style="{ animationDelay: `${i * 150}ms` }"
@@ -85,7 +85,7 @@ useHead({
     <section class="py-16 md:py-24 px-6 md:px-10 lg:px-16">
       <div class="max-w-3xl mx-auto">
         <h2 class="font-display text-2xl md:text-3xl text-ink-800 font-light mb-10 text-center animate-on-scroll">
-          Send a Message
+          {{ contactData.formTitle }}
         </h2>
 
         <!-- Success message -->

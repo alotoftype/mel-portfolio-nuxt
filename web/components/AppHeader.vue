@@ -13,7 +13,6 @@ const socialNav = await getNavigationByLocation('bottomRight')
 const navItems = computed(() => topCornerNav?.items || [])
 const rightSideLink = computed(() => rightSideNav?.items?.[0] || null)
 const socialItems = computed(() => socialNav?.items || [])
-const showFullSocialNames = computed(() => socialNav?.showFullSocialNames ?? true)
 
 onMounted(() => {
   window.addEventListener('scroll', onScroll)
@@ -181,4 +180,3 @@ watch(() => route.path, () => {
     </nav>
   </Transition>
 </template>
-

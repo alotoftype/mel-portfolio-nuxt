@@ -44,7 +44,7 @@ useHead({
               quality="80"
               loading="lazy"
               sizes="xs:100vw sm:50vw md:33vw"
-              densities="x1 x2"
+              densities="x1"
             />
           </NuxtLink>
 
