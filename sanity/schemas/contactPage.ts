@@ -29,6 +29,11 @@ export default defineType({
       name: 'contactItems',
       title: 'Contact Info Cards',
       type: 'array',
+      options: {
+        insertMenu: {
+          views: [{ name: 'list' }, { name: 'grid' }],
+        },
+      },
       of: [
         defineArrayMember({
           type: 'object',

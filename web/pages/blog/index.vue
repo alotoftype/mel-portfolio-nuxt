@@ -1,8 +1,57 @@
 <script setup lang="ts">
-const { getBlogPosts } = useSanityData()
+const { getBlogPosts, isSanityConfigured } = useSanityData()
 useScrollAnimation()
 
-const posts = await getBlogPosts()
+const fallbackPosts = await getBlogPosts()
+const blogIndexQuery = `{
+  "posts": *[_type == "blogPost"] | order(publishedAt desc) {
+    _id,
+    _type,
+    title,
+    "slug": slug.current,
+    author,
+    publishedAt,
+    categories,
+    tags,
+    excerpt,
+    "thumbnail": thumbnail.asset->url
+  }
+}`
+const blogIndexQueryResult = isSanityConfigured
+  ? await (useSanityQuery<any>(blogIndexQuery) as any)
+  : null
+
+function formatPublishedDate(date?: string) {
+  if (!date) return ''
+  const parsed = new Date(date)
+  if (Number.isNaN(parsed.getTime())) return date
+  return parsed.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+}
+
+const posts = computed(() => {
+  const sanityPosts = blogIndexQueryResult?.data?.value?.posts
+  if (Array.isArray(sanityPosts) && sanityPosts.length) {
+    return sanityPosts.map((post: any, index: number) => ({
+      ...post,
+      id: post._id || index + 1,
+      categories: Array.isArray(post.categories) ? post.categories : [],
+      date: formatPublishedDate(post.publishedAt),
+    }))
+  }
+  return fallbackPosts
+})
+
+function blogDataAttr(path?: string) {
+  if (!path) return undefined
+  const encodeDataAttribute = blogIndexQueryResult?.encodeDataAttribute?.value
+  if (!encodeDataAttribute) return undefined
+  return encodeDataAttribute(path)
+}
+
+function blogPostPath(index: number, field?: string) {
+  const basePath = `posts[${index}]`
+  return field ? `${basePath}.${field}` : basePath
+}
 
 useHead({
   title: 'Blog — MelShotya Photography',
@@ -31,9 +80,10 @@ useHead({
           :key="post.id || post._id"
           class="group animate-on-scroll"
           :style="{ animationDelay: `${i * 100}ms` }"
+          :data-sanity="blogDataAttr(blogPostPath(i))"
         >
           <!-- Thumbnail -->
-          <NuxtLink :to="`/blog/${post.slug || post.id}`" class="block overflow-hidden aspect-[4/3] mb-5">
+          <NuxtLink :to="`/blog/${post.slug || post.id}`" class="block overflow-hidden aspect-[4/3] mb-5" :data-sanity="blogDataAttr(blogPostPath(i, 'thumbnail'))">
             <NuxtImg
               :src="post.thumbnail || post.media?.images || post.sliderThumb?.[0]?.image || '/img/blog/01.jpg'"
               :alt="post.title"
@@ -61,7 +111,10 @@ useHead({
 
           <!-- Title -->
           <NuxtLink :to="`/blog/${post.slug || post.id}`">
-            <h2 class="font-display text-xl md:text-2xl text-ink-800 font-light group-hover:text-accent transition-colors duration-300">
+            <h2
+              class="font-display text-xl md:text-2xl text-ink-800 font-light group-hover:text-accent transition-colors duration-300"
+              :data-sanity="blogDataAttr(blogPostPath(i, 'title'))"
+            >
               {{ post.title }}
             </h2>
           </NuxtLink>
@@ -72,6 +125,7 @@ useHead({
               v-for="cat in post.categories"
               :key="cat"
               class="text-2xs uppercase tracking-widest-xl text-accent font-body"
+              :data-sanity="blogDataAttr(blogPostPath(i, 'categories'))"
             >
               {{ cat }}
             </span>

@@ -1,8 +1,21 @@
 <script setup lang="ts">
-const { getContactData } = useSanityData()
+const { getContactData, isSanityConfigured } = useSanityData()
 useScrollAnimation()
 
 const contactData = await getContactData()
+const contactQuery = `*[_type == "contactPage"][0] {
+  title,
+  formTitle,
+  contactItems[] {
+    _key,
+    title,
+    icon,
+    content
+  }
+}`
+const contactQueryResult = isSanityConfigured
+  ? await (useSanityQuery<any>(contactQuery) as any)
+  : null
 const formState = reactive({
   name: '',
   email: '',
@@ -11,6 +24,19 @@ const formState = reactive({
 })
 const isSubmitting = ref(false)
 const submitStatus = ref<'idle' | 'success' | 'error'>('idle')
+
+function contactDataAttr(path?: string) {
+  if (!path) return undefined
+  const encodeDataAttribute = contactQueryResult?.encodeDataAttribute?.value
+  if (!encodeDataAttribute) return undefined
+  return encodeDataAttribute(path)
+}
+
+function contactItemPath(item: any, index: number, field?: string) {
+  const key = typeof item?._key === 'string' ? item._key : ''
+  const basePath = key ? `contactItems[_key=="${key}"]` : `contactItems[${index}]`
+  return field ? `${basePath}.${field}` : basePath
+}
 
 async function handleSubmit() {
   isSubmitting.value = true
@@ -57,21 +83,22 @@ useHead({
       <h1 class="font-display text-display-md md:text-display-lg text-ink-900 font-light animate-on-scroll">
         Contact
       </h1>
-      <p class="max-w-xl mx-auto mt-6 text-ink-500 font-body text-sm leading-relaxed animate-on-scroll">
+      <p class="max-w-xl mx-auto mt-6 text-ink-500 font-body text-sm leading-relaxed animate-on-scroll" :data-sanity="contactDataAttr('title')">
         {{ contactData.title }}
       </p>
     </section>
 
     <!-- Contact Info Cards -->
-    <section class="px-6 md:px-10 lg:px-16 pb-16 md:pb-20">
+    <section class="px-6 md:px-10 lg:px-16 pb-16 md:pb-20" :data-sanity="contactDataAttr('contactItems')">
       <div class="max-w-4xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8">
         <div
           v-for="(item, i) in contactData.contactItems"
           :key="item.id"
           class="text-center py-10 px-6 border border-ink-100 animate-on-scroll"
           :style="{ animationDelay: `${i * 150}ms` }"
+          :data-sanity="contactDataAttr(contactItemPath(item, i))"
         >
-          <h3 class="text-xs uppercase tracking-widest-xl text-ink-400 font-body mb-4">
+          <h3 class="text-xs uppercase tracking-widest-xl text-ink-400 font-body mb-4" :data-sanity="contactDataAttr(contactItemPath(item, i, 'title'))">
             {{ item.title }}
           </h3>
           <div class="text-sm text-ink-700 font-body" v-html="item.info" />
@@ -85,7 +112,9 @@ useHead({
     <section class="py-16 md:py-24 px-6 md:px-10 lg:px-16">
       <div class="max-w-3xl mx-auto">
         <h2 class="font-display text-2xl md:text-3xl text-ink-800 font-light mb-10 text-center animate-on-scroll">
+          <span :data-sanity="contactDataAttr('formTitle')">
           {{ contactData.formTitle }}
+          </span>
         </h2>
 
         <!-- Success message -->

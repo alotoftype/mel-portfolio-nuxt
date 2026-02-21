@@ -12,6 +12,11 @@ export default defineType({
       title: 'Hero Slider',
       description: 'Full-screen hero images shown on the homepage',
       type: 'array',
+      options: {
+        insertMenu: {
+          views: [{ name: 'list' }, { name: 'grid' }],
+        },
+      },
       of: [
         defineArrayMember({
           type: 'object',

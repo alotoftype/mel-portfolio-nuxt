@@ -1,8 +1,41 @@
 <script setup lang="ts">
-const { getHomeData, getPortfolioItems } = useSanityData()
+const { getHomeData, getPortfolioItems, isSanityConfigured } = useSanityData()
 
-const homeData = await getHomeData()
+const fallbackHomeData = await getHomeData()
 const portfolioItems = await getPortfolioItems()
+const homeQuery = `*[_type == "homePage"][0] {
+  _id,
+  _type,
+  slider[] {
+    _key,
+    title,
+    subtitle,
+    description,
+    "image": image.asset->url,
+    buttonText,
+    link
+  },
+  quote,
+  ctaTitle,
+  ctaSubtitle
+}`
+const homeQueryResult = isSanityConfigured
+  ? await (useSanityQuery<any>(homeQuery) as any)
+  : null
+
+const homeData = computed(() => {
+  const sanityHomeData = homeQueryResult?.data?.value
+  if (sanityHomeData?.slider?.length) {
+    return sanityHomeData
+  }
+  return fallbackHomeData
+})
+
+function homeDataAttr(path: string) {
+  const encodeDataAttribute = homeQueryResult?.encodeDataAttribute?.value
+  if (!encodeDataAttribute) return undefined
+  return encodeDataAttribute(path)
+}
 
 useHead({
   title: 'MelShotya Photography — Brooklyn, NY',
@@ -12,7 +45,7 @@ useHead({
 <template>
   <div>
     <!-- Hero Slider -->
-    <HeroSlider :slides="homeData.slider" />
+    <HeroSlider :slides="homeData.slider" array-path="slider" :data-attribute="homeDataAttr" />
 
     <!-- Quote Section -->
     <section class="py-24 md:py-36 px-6 md:px-10 lg:px-16">
@@ -21,7 +54,10 @@ useHead({
           <div class="w-12 h-px bg-accent mx-auto mb-10" />
         </SectionReveal>
         <SectionReveal animation="fade-up" :delay="150">
-          <blockquote class="font-display text-xl md:text-2xl lg:text-3xl text-ink-700 font-light leading-relaxed italic">
+          <blockquote
+            class="font-display text-xl md:text-2xl lg:text-3xl text-ink-700 font-light leading-relaxed italic"
+            :data-sanity="homeDataAttr('quote')"
+          >
             {{ homeData.quote }}
           </blockquote>
         </SectionReveal>
@@ -77,12 +113,12 @@ useHead({
     <section class="py-24 md:py-32 px-6 md:px-10 lg:px-16 bg-ink-950 text-cream-50 relative grain">
       <div class="max-w-3xl mx-auto text-center">
         <SectionReveal animation="fade-up" :delay="0">
-          <p class="text-xs uppercase tracking-widest-xl text-cream-300/50 font-body mb-5">
+          <p class="text-xs uppercase tracking-widest-xl text-cream-300/50 font-body mb-5" :data-sanity="homeDataAttr('ctaSubtitle')">
             {{ homeData.ctaSubtitle || "Let's create something beautiful" }}
           </p>
         </SectionReveal>
         <SectionReveal animation="fade-up" :delay="150">
-          <h2 class="font-display text-display-sm md:text-display-md font-light mb-8">
+          <h2 class="font-display text-display-sm md:text-display-md font-light mb-8" :data-sanity="homeDataAttr('ctaTitle')">
             {{ homeData.ctaTitle || 'Ready to capture your story?' }}
           </h2>
         </SectionReveal>

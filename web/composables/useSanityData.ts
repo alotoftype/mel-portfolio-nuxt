@@ -269,6 +269,7 @@ export function useSanityData() {
           services,
           teamTitle,
           team[] {
+            _key,
             name,
             role,
             "image": image.asset->url
@@ -280,6 +281,7 @@ export function useSanityData() {
           },
           awardsTitle,
           awards[] {
+            _key,
             platform,
             title,
             year
@@ -287,6 +289,7 @@ export function useSanityData() {
           clientsTitle,
           clientsExcerpt,
           clients[] {
+            _key,
             name,
             "logo": logo.asset->url
           }
@@ -309,6 +312,7 @@ export function useSanityData() {
               title: data.teamTitle || 'Meet Our Team',
               team: (data.team || []).map((member: any, index: number) => ({
                 id: member._key || index + 1,
+                _key: member._key,
                 image: normalizeAssetPath(member.image),
                 name: member.name,
                 designation: member.role,
@@ -325,6 +329,7 @@ export function useSanityData() {
               title: data.awardsTitle || 'Awards Achieved',
               awardItem: (data.awards || []).map((award: any, index: number) => ({
                 id: award._key || index + 1,
+                _key: award._key,
                 cate: award.platform,
                 title: award.title,
                 year: award.year,
@@ -336,6 +341,7 @@ export function useSanityData() {
               excerpt: data.clientsExcerpt || '',
               brand: (data.clients || []).map((client: any, index: number) => ({
                 id: client._key || index + 1,
+                _key: client._key,
                 image: normalizeAssetPath(client.logo),
                 name: client.name,
               })),
@@ -381,6 +387,7 @@ export function useSanityData() {
             formEndpoint: data.formEndpoint || defaultContactData.formEndpoint,
             contactItems: data.contactItems.map((item: any, index: number) => ({
               id: item._key || index + 1,
+              _key: item._key,
               title: item.title,
               icon: item.icon,
               info: portableBlocksToHtml(item.content),
@@ -402,6 +409,7 @@ export function useSanityData() {
       try {
         const query = `*[_type == "blogPost"] | order(publishedAt desc) {
           _id,
+          _type,
           title,
           "slug": slug.current,
           author,

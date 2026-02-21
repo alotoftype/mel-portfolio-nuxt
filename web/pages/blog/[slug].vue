@@ -1,10 +1,26 @@
 <script setup lang="ts">
 const route = useRoute()
-const { getBlogPosts } = useSanityData()
+const { getBlogPosts, isSanityConfigured } = useSanityData()
 useScrollAnimation()
 
 const allPosts = await getBlogPosts()
 const slugOrId = route.params.slug as string
+const blogPostQuery = `*[_type == "blogPost" && slug.current == $slug][0] {
+  _id,
+  _type,
+  title,
+  "slug": slug.current,
+  author,
+  publishedAt,
+  categories,
+  tags,
+  excerpt,
+  "thumbnail": thumbnail.asset->url,
+  body
+}`
+const blogPostQueryResult = isSanityConfigured
+  ? await (useSanityQuery<any>(blogPostQuery, { slug: slugOrId }) as any)
+  : null
 
 // Find post by slug or ID
 const post = allPosts.find(
@@ -43,6 +59,13 @@ const sliderImages = computed(() => {
   return []
 })
 
+function postDataAttr(path?: string) {
+  if (!path) return undefined
+  const encodeDataAttribute = blogPostQueryResult?.encodeDataAttribute?.value
+  if (!encodeDataAttribute) return undefined
+  return encodeDataAttribute(path)
+}
+
 useHead({
   title: `${post.title} — MelShotya Blog`,
 })
@@ -56,6 +79,7 @@ useHead({
         :src="thumbnailImage"
         :alt="post.title"
         class="w-full h-full object-cover"
+        :data-sanity="postDataAttr('thumbnail')"
         width="1920"
         height="1080"
         format="webp"
@@ -68,22 +92,23 @@ useHead({
         <div class="max-w-3xl">
           <div class="flex items-center gap-3 mb-4">
             <span
-              v-for="cat in post.categories"
+              v-for="(cat, i) in post.categories"
               :key="cat"
               class="text-2xs uppercase tracking-widest-xl text-accent-light font-body"
+              :data-sanity="postDataAttr(`categories[${i}]`)"
             >
               {{ cat }}
             </span>
           </div>
-          <h1 class="font-display text-display-sm md:text-display-md text-cream-50 font-light">
+          <h1 class="font-display text-display-sm md:text-display-md text-cream-50 font-light" :data-sanity="postDataAttr('title')">
             {{ post.title }}
           </h1>
           <div class="flex items-center gap-4 mt-5">
-            <span class="text-xs text-cream-300/70 font-body">
+            <span class="text-xs text-cream-300/70 font-body" :data-sanity="postDataAttr('author')">
               By {{ post.author }}
             </span>
             <span class="w-1 h-1 rounded-full bg-cream-300/40" />
-            <span class="text-xs text-cream-300/70 font-body">
+            <span class="text-xs text-cream-300/70 font-body" :data-sanity="postDataAttr('publishedAt')">
               {{ post.date || post.publishedAt }}
             </span>
           </div>
@@ -117,23 +142,24 @@ useHead({
     </section>
 
     <!-- Body content -->
-    <article class="py-12 md:py-20 px-6 md:px-10 lg:px-16">
+    <article class="py-12 md:py-20 px-6 md:px-10 lg:px-16" :data-sanity="postDataAttr('body')">
       <div class="max-w-2xl mx-auto">
         <!-- Portable text from Sanity -->
         <div v-if="Array.isArray(post.body)" class="prose prose-stone prose-lg max-w-none font-body">
           <template v-for="(block, i) in post.body" :key="i">
-            <div v-html="block" />
+            <div :data-sanity="postDataAttr(`body[${i}]`)" v-html="block" />
           </template>
         </div>
 
         <!-- Tags -->
-        <div v-if="post.tags?.length" class="mt-12 pt-8 border-t border-ink-100">
+        <div v-if="post.tags?.length" class="mt-12 pt-8 border-t border-ink-100" :data-sanity="postDataAttr('tags')">
           <p class="text-2xs uppercase tracking-widest-xl text-ink-400 font-body mb-4">Tags</p>
           <div class="flex flex-wrap gap-2">
             <span
-              v-for="tag in post.tags"
+              v-for="(tag, i) in post.tags"
               :key="tag"
               class="px-3 py-1.5 text-xs font-body text-ink-600 border border-ink-200 hover:border-ink-400 transition-colors cursor-default"
+              :data-sanity="postDataAttr(`tags[${i}]`)"
             >
               {{ tag }}
             </span>
@@ -147,7 +173,7 @@ useHead({
       <div class="max-w-2xl mx-auto flex items-center justify-between py-6 border-t border-b border-ink-100">
         <div>
           <p class="text-2xs uppercase tracking-widest-xl text-ink-400 font-body mb-1">Written by</p>
-          <p class="text-sm font-body text-ink-700">{{ post.author }}</p>
+          <p class="text-sm font-body text-ink-700" :data-sanity="postDataAttr('author')">{{ post.author }}</p>
         </div>
         <div class="flex gap-3">
           <a

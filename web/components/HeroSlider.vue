@@ -1,6 +1,7 @@
 <script setup lang="ts">
 interface Slide {
   _id?: string
+  _key?: string
   title: string
   subtitle?: string
   image: string
@@ -10,8 +11,12 @@ interface Slide {
 
 const props = withDefaults(defineProps<{
   slides: Slide[]
+  arrayPath?: string
+  dataAttribute?: ((path: string) => string | undefined) | null
 }>(), {
   slides: () => [],
+  arrayPath: 'slider',
+  dataAttribute: null,
 })
 
 const currentSlide = ref(0)
@@ -19,6 +24,19 @@ const isTransitioning = ref(false)
 let autoplayInterval: ReturnType<typeof setInterval> | null = null
 
 const totalSlides = computed(() => props.slides.length)
+const currentSlidePath = computed(() => buildSlidePath(props.slides[currentSlide.value], currentSlide.value))
+
+function buildSlidePath(slide?: Slide, index = 0) {
+  if (!slide) return ''
+  return slide._key
+    ? `${props.arrayPath}[_key=="${slide._key}"]`
+    : `${props.arrayPath}[${index}]`
+}
+
+function encodeDataAttribute(path?: string) {
+  if (!path || !props.dataAttribute) return undefined
+  return props.dataAttribute(path)
+}
 
 function goToSlide(index: number) {
   if (isTransitioning.value || index === currentSlide.value) return
@@ -58,6 +76,7 @@ onUnmounted(() => {
 <template>
   <section
     class="relative h-screen w-full overflow-hidden grain"
+    :data-sanity="encodeDataAttribute(arrayPath)"
     @mouseenter="stopAutoplay"
     @mouseleave="startAutoplay"
   >
@@ -67,6 +86,7 @@ onUnmounted(() => {
       :key="index"
       class="absolute inset-0 transition-opacity duration-1000 ease-expo-out"
       :class="currentSlide === index ? 'opacity-100 z-10' : 'opacity-0 z-0'"
+      :data-sanity="encodeDataAttribute(buildSlidePath(slide, index))"
     >
       <NuxtImg
         :src="slide.image"
@@ -94,16 +114,21 @@ onUnmounted(() => {
             <p
               v-if="slides[currentSlide]?.subtitle"
               class="text-xs uppercase tracking-widest-xl text-cream-200/80 font-body mb-4"
+              :data-sanity="encodeDataAttribute(currentSlidePath ? `${currentSlidePath}.subtitle` : undefined)"
             >
               {{ slides[currentSlide].subtitle }}
             </p>
-            <h2 class="font-display text-display-md md:text-display-lg lg:text-display-xl text-cream-50 font-light">
+            <h2
+              class="font-display text-display-md md:text-display-lg lg:text-display-xl text-cream-50 font-light"
+              :data-sanity="encodeDataAttribute(currentSlidePath ? `${currentSlidePath}.title` : undefined)"
+            >
               {{ slides[currentSlide]?.title }}
             </h2>
             <NuxtLink
               v-if="slides[currentSlide]?.buttonText"
               :to="slides[currentSlide]?.link || '/portfolio'"
               class="inline-block mt-8 text-xs uppercase tracking-widest-xl text-cream-100 font-body border-b border-cream-100/40 pb-1 hover:border-cream-100 transition-colors duration-400"
+              :data-sanity="encodeDataAttribute(currentSlidePath ? `${currentSlidePath}.buttonText` : undefined)"
             >
               {{ slides[currentSlide].buttonText }}
             </NuxtLink>
@@ -128,4 +153,3 @@ onUnmounted(() => {
     </div>
   </section>
 </template>
-

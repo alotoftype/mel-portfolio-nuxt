@@ -46,6 +46,11 @@ export default defineType({
       name: 'team',
       title: 'Team Members',
       type: 'array',
+      options: {
+        insertMenu: {
+          views: [{ name: 'list' }, { name: 'grid' }],
+        },
+      },
       of: [
         defineArrayMember({
           type: 'object',
@@ -89,6 +94,11 @@ export default defineType({
       name: 'awards',
       title: 'Awards',
       type: 'array',
+      options: {
+        insertMenu: {
+          views: [{ name: 'list' }, { name: 'grid' }],
+        },
+      },
       of: [
         defineArrayMember({
           type: 'object',
@@ -120,6 +130,11 @@ export default defineType({
       name: 'clients',
       title: 'Client Logos',
       type: 'array',
+      options: {
+        insertMenu: {
+          views: [{ name: 'list' }, { name: 'grid' }],
+        },
+      },
       of: [
         defineArrayMember({
           type: 'object',
