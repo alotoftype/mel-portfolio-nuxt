@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { safeAlt } from "~/utils/accessibility"
+
 interface PortfolioItem {
   _id?: string
   id: number
@@ -93,7 +95,7 @@ function setFilter(filter: string) {
       >
         <NuxtImg
           :src="item.homeImage"
-          :alt="item.title"
+          :alt="safeAlt(item.title, 'Portfolio image')"
           class="w-full h-full object-cover transition-transform duration-800 ease-expo-out group-hover:scale-105"
           width="600"
           height="800"
@@ -141,4 +143,3 @@ function setFilter(filter: string) {
     </div>
   </section>
 </template>
-

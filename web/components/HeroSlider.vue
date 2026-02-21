@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { safeAlt } from "~/utils/accessibility"
+
 interface Slide {
   _id?: string
   _key?: string
@@ -90,7 +92,7 @@ onUnmounted(() => {
     >
       <NuxtImg
         :src="slide.image"
-        :alt="slide.title"
+        :alt="safeAlt(slide.title, 'Hero image')"
         class="w-full h-full object-cover"
         :class="currentSlide === index ? 'scale-100' : 'scale-105'"
         style="transition: transform 6s cubic-bezier(0.16, 1, 0.3, 1);"

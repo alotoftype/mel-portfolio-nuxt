@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { safeAlt } from "~/utils/accessibility"
+
 const route = useRoute()
 const { getPortfolioItem } = useSanityData()
 useScrollAnimation()
@@ -40,7 +42,7 @@ function cleanHtml(text: string) {
     <section class="relative h-[60vh] md:h-[75vh] overflow-hidden">
       <NuxtImg
         :src="item.homeImage"
-        :alt="item.title"
+        :alt="safeAlt(item.title, 'Portfolio cover image')"
         class="w-full h-full object-cover"
         width="1920"
         height="1200"
@@ -118,7 +120,7 @@ function cleanHtml(text: string) {
           >
             <NuxtImg
               :src="img"
-              :alt="`${item.title} gallery image ${i + 1}`"
+              :alt="safeAlt(item.title, `Portfolio gallery image ${i + 1}`)"
               class="w-full h-full object-cover transition-transform duration-800 ease-expo-out group-hover:scale-105"
               :width="i === 0 ? 1200 : 800"
               :height="i === 0 ? 675 : 600"

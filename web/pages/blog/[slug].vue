@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { safeAlt } from "~/utils/accessibility"
+
 const route = useRoute()
 const { getBlogPosts, isSanityConfigured } = useSanityData()
 useScrollAnimation()
@@ -77,7 +79,7 @@ useHead({
     <section class="relative h-[50vh] md:h-[65vh] overflow-hidden">
       <NuxtImg
         :src="thumbnailImage"
-        :alt="post.title"
+        :alt="safeAlt(post.title, 'Blog cover image')"
         class="w-full h-full object-cover"
         :data-sanity="postDataAttr('thumbnail')"
         width="1920"
@@ -127,7 +129,7 @@ useHead({
         >
           <NuxtImg
             :src="img"
-            :alt="`${post.title} image ${i + 1}`"
+            :alt="safeAlt(post.title, `Blog image ${i + 1}`)"
             class="w-full aspect-[3/2] object-cover"
             width="800"
             height="533"
@@ -221,7 +223,7 @@ useHead({
             >
               <NuxtImg
                 :src="related.thumbnail || related.media?.images || related.sliderThumb?.[0]?.image || '/img/blog/01.jpg'"
-                :alt="related.title"
+                :alt="safeAlt(related.title, 'Related blog image')"
                 class="w-full h-full object-cover transition-transform duration-600 ease-expo-out group-hover:scale-105"
                 width="600"
                 height="450"

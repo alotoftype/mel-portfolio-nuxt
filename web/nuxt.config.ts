@@ -36,9 +36,9 @@ export default defineNuxtConfig({
   },
 
   image: {
-    // `none` in dev makes local interaction faster by skipping on-the-fly IPX transforms.
-    // Override with `NUXT_IMAGE_PROVIDER=ipx` when you need to test transformed images locally.
-    provider: process.env.NUXT_IMAGE_PROVIDER || (isDev ? "none" : "ipx"),
+    // Default to `none` so deployed builds do not depend on runtime `_ipx` transforms.
+    // You can still opt in explicitly with `NUXT_IMAGE_PROVIDER=ipx`.
+    provider: process.env.NUXT_IMAGE_PROVIDER || "none",
     quality: 80,
     formats: ["webp"],
     screens: {

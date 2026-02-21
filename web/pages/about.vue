@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { safeAlt } from "~/utils/accessibility"
+
 const { getAboutData, isSanityConfigured } = useSanityData()
 useScrollAnimation()
 
@@ -172,7 +174,7 @@ useHead({
             <div class="aspect-square overflow-hidden mb-4">
               <NuxtImg
                 :src="member.image"
-                :alt="cleanHtml(member.name)"
+                :alt="safeAlt(cleanHtml(member.name), 'Team member portrait')"
                 class="w-full h-full object-cover grayscale hover:grayscale-0 transition-all duration-600"
                 width="400"
                 height="400"
@@ -243,7 +245,7 @@ useHead({
           >
             <NuxtImg
               :src="brand.image"
-              alt="Client logo"
+              :alt="safeAlt(brand.name, `Client logo ${i + 1}`)"
               class="h-10 md:h-12 object-contain"
               width="200"
               height="48"

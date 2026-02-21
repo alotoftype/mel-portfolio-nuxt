@@ -46,7 +46,8 @@ function portableBlocksToHtmlBlocks(blocks: any[] | undefined) {
       }
 
       if (block?._type === 'image' && block.imageUrl) {
-        const alt = block.alt ? escapeHtml(block.alt) : 'Image'
+        const altSource = block.alt || block.caption || 'Content image'
+        const alt = escapeHtml(String(altSource))
         return `<p><img src="${block.imageUrl}" alt="${alt}" /></p>`
       }
 

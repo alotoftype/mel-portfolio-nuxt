@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { safeAlt } from "~/utils/accessibility"
+
 const { isOpen, currentImage, currentTitle, closeLightbox } = useLightbox()
 
 function onKeydown(e: KeyboardEvent) {
@@ -38,7 +40,7 @@ watch(isOpen, (val) => {
       <div class="relative max-w-6xl max-h-[85vh] animate-scale-in">
         <img
           :src="currentImage"
-          :alt="currentTitle"
+          :alt="safeAlt(currentTitle, 'Expanded image preview')"
           class="max-w-full max-h-[85vh] object-contain"
         />
         <p v-if="currentTitle" class="absolute -bottom-10 left-0 text-sm text-cream-300/60 font-body">
@@ -48,4 +50,3 @@ watch(isOpen, (val) => {
     </div>
   </Transition>
 </template>
-

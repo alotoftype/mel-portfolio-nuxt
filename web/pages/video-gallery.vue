@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { safeAlt } from "~/utils/accessibility"
+
 const { getPortfolioItems } = useSanityData()
 useScrollAnimation()
 
@@ -16,8 +18,9 @@ const galleryItems = computed(() =>
 
 const isVideoOpen = ref(false)
 const currentVideoUrl = ref('')
+const currentVideoTitle = ref('')
 
-function openVideo(url: string) {
+function openVideo(url: string, title?: string) {
   // Convert watch URL to embed URL if needed
   let embedUrl = url
   if (url.includes('youtube.com/watch')) {
@@ -25,6 +28,7 @@ function openVideo(url: string) {
     embedUrl = `https://www.youtube.com/embed/${id}`
   }
   currentVideoUrl.value = embedUrl
+  currentVideoTitle.value = safeAlt(title, 'Portfolio video')
   isVideoOpen.value = true
   document.body.style.overflow = 'hidden'
 }
@@ -32,6 +36,7 @@ function openVideo(url: string) {
 function closeVideo() {
   isVideoOpen.value = false
   currentVideoUrl.value = ''
+  currentVideoTitle.value = ''
   document.body.style.overflow = ''
 }
 
@@ -65,11 +70,11 @@ useHead({
           :key="item.id"
           class="group relative cursor-pointer overflow-hidden aspect-video animate-on-scroll"
           :style="{ animationDelay: `${i * 80}ms` }"
-          @click="item.videoUrl ? openVideo(item.videoUrl) : useLightbox().openLightbox(item.homeImage, item.title)"
+          @click="item.videoUrl ? openVideo(item.videoUrl, item.title) : useLightbox().openLightbox(item.homeImage, item.title)"
         >
           <img
             :src="item.homeImage"
-            :alt="item.title"
+            :alt="safeAlt(item.title, 'Video gallery image')"
             class="w-full h-full object-cover transition-transform duration-800 ease-expo-out group-hover:scale-105"
             loading="lazy"
           />
@@ -123,6 +128,7 @@ useHead({
           <div class="w-full max-w-5xl aspect-video animate-scale-in">
             <iframe
               :src="currentVideoUrl + '?autoplay=1'"
+              :title="`Video player: ${currentVideoTitle}`"
               class="w-full h-full"
               frameborder="0"
               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"

@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { safeAlt } from "~/utils/accessibility"
+
 /**
  * ImageReveal — a wrapper that reveals images with a curtain/clip animation
  * when they scroll into view. Great for portfolio grids and hero sections.
@@ -60,7 +62,7 @@ onMounted(() => {
     >
       <img
         :src="src"
-        :alt="alt"
+        :alt="safeAlt(alt, 'Image reveal')"
         class="w-full h-full object-cover transition-all duration-800 ease-expo-out"
         :class="[
           grayscale ? 'grayscale hover:grayscale-0' : '',

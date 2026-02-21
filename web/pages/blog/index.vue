@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { safeAlt } from "~/utils/accessibility"
+
 const { getBlogPosts, isSanityConfigured } = useSanityData()
 useScrollAnimation()
 
@@ -86,7 +88,7 @@ useHead({
           <NuxtLink :to="`/blog/${post.slug || post.id}`" class="block overflow-hidden aspect-[4/3] mb-5" :data-sanity="blogDataAttr(blogPostPath(i, 'thumbnail'))">
             <NuxtImg
               :src="post.thumbnail || post.media?.images || post.sliderThumb?.[0]?.image || '/img/blog/01.jpg'"
-              :alt="post.title"
+              :alt="safeAlt(post.title, 'Blog post image')"
               class="w-full h-full object-cover transition-transform duration-800 ease-expo-out group-hover:scale-105"
               width="800"
               height="600"
