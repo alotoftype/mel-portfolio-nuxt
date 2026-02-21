@@ -54,7 +54,22 @@ export default defineType({
               name: 'link',
               title: 'Button Link',
               type: 'string',
+              description: 'Use /path for internal links or a full URL for external links',
               initialValue: '/portfolio',
+              validation: (Rule) =>
+                Rule.custom((value) => {
+                  const url = typeof value === 'string' ? value.trim() : ''
+                  if (!url) return true
+                  if (
+                    url.startsWith('/') ||
+                    url.startsWith('#') ||
+                    /^(https?:)?\/\//i.test(url) ||
+                    /^(mailto:|tel:|sms:|ftp:)/i.test(url)
+                  ) {
+                    return true
+                  }
+                  return 'Use /path for internal links or a full/protocol URL'
+                }),
             }),
           ],
           preview: {
@@ -70,6 +85,11 @@ export default defineType({
       description: 'Displayed below the hero slider on the homepage',
       type: 'text',
       rows: 4,
+    }),
+    defineField({
+      name: 'seo',
+      title: 'SEO',
+      type: 'seo',
     }),
     defineField({
       name: 'ctaTitle',

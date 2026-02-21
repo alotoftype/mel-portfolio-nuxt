@@ -12,9 +12,27 @@ if (!item) {
   throw createError({ statusCode: 404, message: 'Portfolio item not found' })
 }
 
-useHead({
-  title: `${item.title} — MelShotya Photography`,
-})
+const portfolioSeoTitle = computed(() => item.seo?.metaTitle || `${item.title} — MelShotya Photography`)
+const portfolioSeoDescription = computed(() =>
+  item.seo?.metaDescription ||
+  item.excerpt ||
+  `View the ${item.title} project in the MelShotya photography portfolio.`
+)
+const portfolioSeoImage = computed(() => item.seo?.ogImage || item.homeImage || undefined)
+const portfolioSeoRobots = computed(() => (item.seo?.noIndex ? 'noindex, nofollow' : undefined))
+
+useHead(() => ({
+  title: portfolioSeoTitle.value,
+}))
+
+useSeoMeta(() => ({
+  description: portfolioSeoDescription.value,
+  ogTitle: portfolioSeoTitle.value,
+  ogDescription: portfolioSeoDescription.value,
+  ogImage: portfolioSeoImage.value,
+  twitterImage: portfolioSeoImage.value,
+  robots: portfolioSeoRobots.value,
+}))
 
 // Build gallery array from old data format
 const galleryImages = computed(() => {

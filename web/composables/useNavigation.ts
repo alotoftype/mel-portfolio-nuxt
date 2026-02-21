@@ -2,6 +2,7 @@
  * Composable for fetching navigation data from Sanity
  */
 import { canUseSanityInProcess, handleSanityFetchError } from '~/composables/useSanityFallback'
+import { isExternalUrl, normalizeNavigationUrl } from '~/utils/links'
 
 export interface NavigationItem {
   label: string
@@ -35,6 +36,23 @@ export function useNavigation() {
     return data.value || null
   }
 
+  function normalizeNavigationEntry(navigation: Navigation): Navigation {
+    return {
+      ...navigation,
+      items: (navigation.items || [])
+        .map((item) => {
+          const url = normalizeNavigationUrl(item?.url)
+          return {
+            ...item,
+            label: (item?.label || '').trim(),
+            url,
+            openInNewTab: Boolean(item?.openInNewTab || isExternalUrl(url)),
+          }
+        })
+        .filter((item) => Boolean(item.label) && Boolean(item.url)),
+    }
+  }
+
   /**
    * Fetch all navigation areas
    */
@@ -55,14 +73,14 @@ export function useNavigation() {
           enabled
         }`
         const data = await fetchSanityQuery<Navigation[]>(query)
-        if (data?.length) return data
+        if (data?.length) return data.map((entry) => normalizeNavigationEntry(entry))
       } catch (e) {
         handleSanityFetchError('Fetching all navigation', e)
       }
     }
 
     // Fallback to default navigation
-    return getDefaultNavigation()
+    return getDefaultNavigation().map((entry) => normalizeNavigationEntry(entry))
   }
 
   /**
@@ -87,7 +105,7 @@ export function useNavigation() {
           enabled
         }`
         const data = await fetchSanityQuery<Navigation | null>(query, { location })
-        if (data) return data
+        if (data) return normalizeNavigationEntry(data)
       } catch (e) {
         handleSanityFetchError(`Fetching navigation for ${location}`, e)
       }
@@ -95,7 +113,8 @@ export function useNavigation() {
 
     // Fallback
     const defaultNav = getDefaultNavigation()
-    return defaultNav.find((nav) => nav.location === location) || null
+    const nav = defaultNav.find((entry) => entry.location === location) || null
+    return nav ? normalizeNavigationEntry(nav) : null
   }
 
   /**

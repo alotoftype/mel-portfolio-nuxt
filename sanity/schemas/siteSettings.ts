@@ -22,6 +22,26 @@ export default defineType({
         'MelShotya Photography — Brooklyn-based photography studio specializing in portraits, events, fashion, and editorial work.',
     }),
     defineField({
+      name: 'defaultOgImage',
+      title: 'Default Social Share Image',
+      description: 'Used as OG/Twitter image when page-level images are unavailable',
+      type: 'image',
+      options: { hotspot: true },
+    }),
+    defineField({
+      name: 'twitterHandle',
+      title: 'Twitter/X Handle',
+      description: 'Example: @melshotya',
+      type: 'string',
+    }),
+    defineField({
+      name: 'robotsNoIndex',
+      title: 'Discourage Search Engine Indexing',
+      description: 'Turn on only for staging/private environments',
+      type: 'boolean',
+      initialValue: false,
+    }),
+    defineField({
       name: 'logo',
       title: 'Logo',
       type: 'image',

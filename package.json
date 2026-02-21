@@ -3,9 +3,9 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "dev": "concurrently \"npm run dev:web\" \"npm run dev:sanity\"",
-    "dev:web": "cd web && npm run dev",
-    "dev:sanity": "cd sanity && npm run dev",
+    "dev": "concurrently --kill-others-on-fail \"npm run dev:web\" \"npm run dev:sanity\"",
+    "dev:web": "./dev-web.sh",
+    "dev:sanity": "./dev-sanity.sh",
     "install:all": "npm install && cd web && npm install && cd ../sanity && npm install",
     "deploy:web": "./deploy-web.sh",
     "deploy:studio": "./deploy-sanity.sh",

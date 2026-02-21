@@ -58,6 +58,14 @@ function blogPostPath(index: number, field?: string) {
 useHead({
   title: 'Blog — MelShotya Photography',
 })
+
+useSeoMeta({
+  description:
+    'Photography stories, behind-the-scenes insights, and creative inspiration from MelShotya.',
+  ogTitle: 'Blog — MelShotya Photography',
+  ogDescription:
+    'Photography stories, behind-the-scenes insights, and creative inspiration from MelShotya.',
+})
 </script>
 
 <template>

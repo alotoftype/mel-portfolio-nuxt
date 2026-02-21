@@ -15,6 +15,12 @@ const homeQuery = `*[_type == "homePage"][0] {
     buttonText,
     link
   },
+  seo {
+    metaTitle,
+    metaDescription,
+    "ogImage": ogImage.asset->url,
+    noIndex
+  },
   quote,
   ctaTitle,
   ctaSubtitle
@@ -31,15 +37,33 @@ const homeData = computed(() => {
   return fallbackHomeData
 })
 
+const homeSeo = computed(() => homeData.value?.seo || {})
+const homeSeoTitle = computed(() => homeSeo.value.metaTitle || 'MelShotya Photography — Brooklyn, NY')
+const homeSeoDescription = computed(() =>
+  homeSeo.value.metaDescription ||
+  'Brooklyn photography portfolio featuring portraits, engagements, fashion editorials, and event storytelling by MelShotya.'
+)
+const homeSeoImage = computed(() => homeSeo.value.ogImage || homeData.value?.slider?.[0]?.image || undefined)
+const homeSeoRobots = computed(() => (homeSeo.value.noIndex ? 'noindex, nofollow' : undefined))
+
 function homeDataAttr(path: string) {
   const encodeDataAttribute = homeQueryResult?.encodeDataAttribute?.value
   if (!encodeDataAttribute) return undefined
   return encodeDataAttribute(path)
 }
 
-useHead({
-  title: 'MelShotya Photography — Brooklyn, NY',
-})
+useHead(() => ({
+  title: homeSeoTitle.value,
+}))
+
+useSeoMeta(() => ({
+  description: homeSeoDescription.value,
+  ogTitle: homeSeoTitle.value,
+  ogDescription: homeSeoDescription.value,
+  ogImage: homeSeoImage.value,
+  twitterImage: homeSeoImage.value,
+  robots: homeSeoRobots.value,
+}))
 </script>
 
 <template>

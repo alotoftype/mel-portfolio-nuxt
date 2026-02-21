@@ -66,6 +66,11 @@ export default defineType({
       rows: 3,
     }),
     defineField({
+      name: 'seo',
+      title: 'SEO',
+      type: 'seo',
+    }),
+    defineField({
       name: 'body',
       title: 'Body Content',
       type: 'array',

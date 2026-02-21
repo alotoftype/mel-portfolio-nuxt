@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { isExternalUrl } from '~/utils/links'
+
 const year = new Date().getFullYear()
 
 const { getNavigationByLocation } = useNavigation()
@@ -18,12 +20,12 @@ const showFullSocialNames = computed(() => bottomRightNav?.showFullSocialNames ?
       <div class="grid grid-cols-1 md:grid-cols-3 gap-10 md:gap-8 items-start">
         <!-- Left: Links -->
         <nav v-if="footerLinks.length > 0" class="flex gap-6 text-xs font-body uppercase tracking-widest-xl text-ink-400">
-          <template v-for="link in footerLinks" :key="link.url">
+          <template v-for="(link, i) in footerLinks" :key="`${link.label}-${link.url}-${i}`">
             <a
-              v-if="link.openInNewTab"
+              v-if="link.openInNewTab || isExternalUrl(link.url)"
               :href="link.url"
-              target="_blank"
-              rel="noopener noreferrer"
+              :target="link.openInNewTab ? '_blank' : undefined"
+              :rel="link.openInNewTab ? 'noopener noreferrer' : undefined"
               class="hover:text-ink-700 transition-colors duration-300"
             >
               {{ link.label }}

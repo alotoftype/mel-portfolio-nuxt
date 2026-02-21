@@ -4,23 +4,38 @@ import { visionTool } from '@sanity/vision'
 import { defineDocuments, defineLocations, presentationTool } from 'sanity/presentation'
 import { schemaTypes } from './schemas'
 
+const projectId = process.env.SANITY_STUDIO_PROJECT_ID || process.env.SANITY_PROJECT_ID || 'your-project-id'
+const dataset = process.env.SANITY_STUDIO_DATASET || process.env.SANITY_DATASET || 'production'
 const previewUrl =
   process.env.SANITY_STUDIO_PREVIEW_URL ||
   process.env.SANITY_STUDIO_FRONTEND_URL ||
   'http://localhost:3000'
+const defaultAllowOrigins = [
+  previewUrl,
+  'http://localhost:3000',
+  'http://127.0.0.1:3000',
+  'https://melshotya.com',
+  'https://www.melshotya.com',
+]
+const envAllowOrigins = (process.env.SANITY_STUDIO_ALLOW_ORIGINS || '')
+  .split(',')
+  .map((value) => value.trim())
+  .filter(Boolean)
+const allowOrigins = [...new Set([...defaultAllowOrigins, ...envAllowOrigins])]
 
 export default defineConfig({
   name: 'mel-portfolio',
   title: 'MelShotya Photography',
 
   // Replace with your project ID and dataset
-  projectId: process.env.SANITY_STUDIO_PROJECT_ID || 'your-project-id',
-  dataset: process.env.SANITY_STUDIO_DATASET || 'production',
+  projectId,
+  dataset,
 
   plugins: [
     presentationTool({
       previewUrl: {
         initial: previewUrl,
+        allowOrigins,
         previewMode: {
           enable: '/preview/enable',
         },

@@ -44,7 +44,20 @@ export default defineType({
               title: 'URL',
               type: 'string',
               description: 'Internal links start with / (e.g., /about), external links include https://',
-              validation: (Rule) => Rule.required(),
+              validation: (Rule) =>
+                Rule.required().custom((value) => {
+                  const url = typeof value === 'string' ? value.trim() : ''
+                  if (!url) return 'URL is required'
+                  if (
+                    url.startsWith('/') ||
+                    url.startsWith('#') ||
+                    /^(https?:)?\/\//i.test(url) ||
+                    /^(mailto:|tel:|sms:|ftp:)/i.test(url)
+                  ) {
+                    return true
+                  }
+                  return 'Use /path for internal links or a full/protocol URL (https://, mailto:, tel:, etc.)'
+                }),
             },
             {
               name: 'icon',

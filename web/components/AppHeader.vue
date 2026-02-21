@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { isExternalUrl } from '~/utils/links'
+
 const route = useRoute()
 const isMenuOpen = ref(false)
 const isScrolled = ref(false)
@@ -87,11 +89,18 @@ watch(() => route.path, () => {
 
       <!-- Right side menu -->
       <div class="w-20 flex justify-end">
-        <NuxtLink
-          v-if="rightSideLink"
-          :to="rightSideLink.url"
+        <a
+          v-if="rightSideLink && (rightSideLink.openInNewTab || isExternalUrl(rightSideLink.url))"
+          :href="rightSideLink.url"
           :target="rightSideLink.openInNewTab ? '_blank' : undefined"
           :rel="rightSideLink.openInNewTab ? 'noopener noreferrer' : undefined"
+          class="text-xs font-body uppercase tracking-widest-xl text-ink-600 hover:text-ink-900 transition-colors duration-300 hidden sm:inline"
+        >
+          {{ rightSideLink.label }}
+        </a>
+        <NuxtLink
+          v-else-if="rightSideLink"
+          :to="rightSideLink.url"
           class="text-xs font-body uppercase tracking-widest-xl text-ink-600 hover:text-ink-900 transition-colors duration-300 hidden sm:inline"
         >
           {{ rightSideLink.label }}
@@ -132,14 +141,15 @@ watch(() => route.path, () => {
       <!-- Nav links -->
       <div class="flex-1 flex flex-col justify-center px-6 md:px-10 -mt-16">
         <ul class="space-y-1">
-          <li v-for="(item, i) in navItems" :key="item.url">
+          <li v-for="(item, i) in navItems" :key="`${item.label}-${item.url}-${i}`">
             <a
-              v-if="item.openInNewTab"
+              v-if="item.openInNewTab || isExternalUrl(item.url)"
               :href="item.url"
-              target="_blank"
-              rel="noopener noreferrer"
+              :target="item.openInNewTab ? '_blank' : undefined"
+              :rel="item.openInNewTab ? 'noopener noreferrer' : undefined"
               class="block py-3 font-display text-display-sm md:text-display-md text-ink-800 hover:text-accent transition-colors duration-400"
               :style="{ animationDelay: `${(i + 1) * 80}ms` }"
+              @click="closeMenu"
             >
               {{ item.label }}
             </a>

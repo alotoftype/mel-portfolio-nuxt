@@ -14,6 +14,15 @@ import contactCardsData from '~/data/contact.json'
 import blogData from '~/data/blog.json'
 import { canUseSanityInProcess, handleSanityFetchError } from '~/composables/useSanityFallback'
 
+function normalizeSeoData(seo?: any) {
+  return {
+    metaTitle: typeof seo?.metaTitle === 'string' ? seo.metaTitle : '',
+    metaDescription: typeof seo?.metaDescription === 'string' ? seo.metaDescription : '',
+    ogImage: normalizeAssetPath(seo?.ogImage),
+    noIndex: Boolean(seo?.noIndex),
+  }
+}
+
 function normalizeAssetPath(path?: string) {
   if (!path) return ''
   if (path.startsWith('http://') || path.startsWith('https://')) return path
@@ -81,6 +90,7 @@ function normalizePortfolioItem(item: any, index = 0) {
           .map((url: string) => normalizeAssetPath(url))
       : [],
     body: Array.isArray(item.body) ? portableBlocksToHtmlBlocks(item.body) : item.body,
+    seo: normalizeSeoData(item.seo),
   }
 }
 
@@ -138,6 +148,12 @@ export function useSanityData() {
             title,
             "slug": slug.current,
             excerpt,
+            seo {
+              metaTitle,
+              metaDescription,
+              "ogImage": ogImage.asset->url,
+              noIndex
+            },
             categories,
             "homeImage": homeImage.asset->url,
             client,
@@ -185,6 +201,12 @@ export function useSanityData() {
           title,
           "slug": slug.current,
           excerpt,
+          seo {
+            metaTitle,
+            metaDescription,
+            "ogImage": ogImage.asset->url,
+            noIndex
+          },
           categories,
           "homeImage": homeImage.asset->url,
             client,
@@ -233,12 +255,21 @@ export function useSanityData() {
               link
             },
             quote,
+            seo {
+              metaTitle,
+              metaDescription,
+              "ogImage": ogImage.asset->url,
+              noIndex
+            },
             ctaTitle,
             ctaSubtitle
           }`
         const result = await fetchSanityQuery<any>(query)
         if (result && result.slider) {
-          return result
+          return {
+            ...result,
+            seo: normalizeSeoData(result.seo),
+          }
         }
       } catch (e) {
         handleSanityFetchError('Fetching home page data', e)
@@ -254,6 +285,7 @@ export function useSanityData() {
         link: '/portfolio',
       })),
       quote: (homeData[1] as any).qute,
+      seo: normalizeSeoData(),
     }
   }
 
@@ -360,10 +392,30 @@ export function useSanityData() {
    * Fetch contact info
    */
   async function getContactData() {
+    const defaultResponseTemplates = {
+      bookSession: {
+        title: 'Session Request Received',
+        message:
+          'Thanks for reaching out about booking a session. We received your request and will follow up shortly.',
+      },
+      generalInquiry: {
+        title: 'Inquiry Received',
+        message:
+          'Thank you for your message. We received your inquiry and will get back to you soon.',
+      },
+      custom: {
+        title: 'Message Received',
+        message:
+          'Thanks for contacting us. Your message was sent successfully and we will respond as soon as possible.',
+      },
+    }
+
     const defaultContactData = {
       title: 'Contact us for any further questions, possible projects & business partnerships.',
       formTitle: 'Send a Message',
       formEndpoint: 'https://getform.io/f/a17a2715-d7ee-4ac4-8fcb-12f1eed43b2c',
+      seo: normalizeSeoData(),
+      responseTemplates: defaultResponseTemplates,
       contactItems: contactCardsData,
     }
 
@@ -373,6 +425,26 @@ export function useSanityData() {
           title,
           formTitle,
           formEndpoint,
+          seo {
+            metaTitle,
+            metaDescription,
+            "ogImage": ogImage.asset->url,
+            noIndex
+          },
+          responseTemplates {
+            bookSession {
+              title,
+              message
+            },
+            generalInquiry {
+              title,
+              message
+            },
+            custom {
+              title,
+              message
+            }
+          },
           contactItems[] {
             _key,
             title,
@@ -381,18 +453,47 @@ export function useSanityData() {
           }
         }`
         const data = await fetchSanityQuery<any>(query)
-        if (data?.contactItems) {
+        if (data) {
           return {
             title: data.title || defaultContactData.title,
             formTitle: data.formTitle || defaultContactData.formTitle,
             formEndpoint: data.formEndpoint || defaultContactData.formEndpoint,
-            contactItems: data.contactItems.map((item: any, index: number) => ({
-              id: item._key || index + 1,
-              _key: item._key,
-              title: item.title,
-              icon: item.icon,
-              info: portableBlocksToHtml(item.content),
-            })),
+            seo: normalizeSeoData(data.seo),
+            responseTemplates: {
+              bookSession: {
+                title:
+                  data.responseTemplates?.bookSession?.title ||
+                  defaultResponseTemplates.bookSession.title,
+                message:
+                  data.responseTemplates?.bookSession?.message ||
+                  defaultResponseTemplates.bookSession.message,
+              },
+              generalInquiry: {
+                title:
+                  data.responseTemplates?.generalInquiry?.title ||
+                  defaultResponseTemplates.generalInquiry.title,
+                message:
+                  data.responseTemplates?.generalInquiry?.message ||
+                  defaultResponseTemplates.generalInquiry.message,
+              },
+              custom: {
+                title:
+                  data.responseTemplates?.custom?.title ||
+                  defaultResponseTemplates.custom.title,
+                message:
+                  data.responseTemplates?.custom?.message ||
+                  defaultResponseTemplates.custom.message,
+              },
+            },
+            contactItems: Array.isArray(data.contactItems)
+              ? data.contactItems.map((item: any, index: number) => ({
+                  id: item._key || index + 1,
+                  _key: item._key,
+                  title: item.title,
+                  icon: item.icon,
+                  info: portableBlocksToHtml(item.content),
+                }))
+              : defaultContactData.contactItems,
           }
         }
       } catch (e) {
@@ -418,6 +519,12 @@ export function useSanityData() {
           categories,
           "thumbnail": thumbnail.asset->url,
           excerpt,
+          seo {
+            metaTitle,
+            metaDescription,
+            "ogImage": ogImage.asset->url,
+            noIndex
+          },
           body[] {
             ...,
             "imageUrl": asset->url
@@ -433,13 +540,17 @@ export function useSanityData() {
             thumbnail: normalizeAssetPath(post.thumbnail),
             body: portableBlocksToHtmlBlocks(post.body),
             date: formatPublishedDate(post.publishedAt),
+            seo: normalizeSeoData(post.seo),
           }))
         }
       } catch (e) {
         handleSanityFetchError('Fetching blog posts', e)
       }
     }
-    return blogData
+    return (blogData as any[]).map((post: any) => ({
+      ...post,
+      seo: normalizeSeoData(),
+    }))
   }
 
   return {

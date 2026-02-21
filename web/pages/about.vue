@@ -8,6 +8,12 @@ const aboutData = await getAboutData()
 const aboutQuery = `*[_type == "aboutPage"][0] {
   title,
   excerpt,
+  seo {
+    metaTitle,
+    metaDescription,
+    "ogImage": ogImage.asset->url,
+    noIndex
+  },
   servicesTitle,
   services,
   teamTitle,
@@ -79,9 +85,29 @@ function scopedArrayPath(arrayPath: string, item: any, index: number, field?: st
   return field ? `${basePath}.${field}` : basePath
 }
 
-useHead({
-  title: 'About — MelShotya Photography',
-})
+const aboutSeo = computed(() => aboutQueryResult?.data?.value?.seo || {})
+const aboutFallbackDescription = computed(() => cleanHtml(aboutMe?.excerpt || '').slice(0, 160))
+const aboutSeoTitle = computed(() => aboutSeo.value.metaTitle || 'About — MelShotya Photography')
+const aboutSeoDescription = computed(() =>
+  aboutSeo.value.metaDescription ||
+  aboutFallbackDescription.value ||
+  'Learn more about MelShotya Photography and our creative team.'
+)
+const aboutSeoImage = computed(() => aboutSeo.value.ogImage || undefined)
+const aboutSeoRobots = computed(() => (aboutSeo.value.noIndex ? 'noindex, nofollow' : undefined))
+
+useHead(() => ({
+  title: aboutSeoTitle.value,
+}))
+
+useSeoMeta(() => ({
+  description: aboutSeoDescription.value,
+  ogTitle: aboutSeoTitle.value,
+  ogDescription: aboutSeoDescription.value,
+  ogImage: aboutSeoImage.value,
+  twitterImage: aboutSeoImage.value,
+  robots: aboutSeoRobots.value,
+}))
 </script>
 
 <template>

@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { safeAlt } from "~/utils/accessibility"
+import { isExternalUrl, normalizeOptionalUrl } from '~/utils/links'
 
 interface Slide {
   _id?: string
@@ -27,6 +28,8 @@ let autoplayInterval: ReturnType<typeof setInterval> | null = null
 
 const totalSlides = computed(() => props.slides.length)
 const currentSlidePath = computed(() => buildSlidePath(props.slides[currentSlide.value], currentSlide.value))
+const currentCtaLink = computed(() => normalizeOptionalUrl(props.slides[currentSlide.value]?.link) || '/portfolio')
+const currentCtaIsExternal = computed(() => isExternalUrl(currentCtaLink.value))
 
 function buildSlidePath(slide?: Slide, index = 0) {
   if (!slide) return ''
@@ -126,9 +129,19 @@ onUnmounted(() => {
             >
               {{ slides[currentSlide]?.title }}
             </h2>
+            <a
+              v-if="slides[currentSlide]?.buttonText && currentCtaIsExternal"
+              :href="currentCtaLink"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="inline-block mt-8 text-xs uppercase tracking-widest-xl text-cream-100 font-body border-b border-cream-100/40 pb-1 hover:border-cream-100 transition-colors duration-400"
+              :data-sanity="encodeDataAttribute(currentSlidePath ? `${currentSlidePath}.buttonText` : undefined)"
+            >
+              {{ slides[currentSlide].buttonText }}
+            </a>
             <NuxtLink
-              v-if="slides[currentSlide]?.buttonText"
-              :to="slides[currentSlide]?.link || '/portfolio'"
+              v-else-if="slides[currentSlide]?.buttonText"
+              :to="currentCtaLink"
               class="inline-block mt-8 text-xs uppercase tracking-widest-xl text-cream-100 font-body border-b border-cream-100/40 pb-1 hover:border-cream-100 transition-colors duration-400"
               :data-sanity="encodeDataAttribute(currentSlidePath ? `${currentSlidePath}.buttonText` : undefined)"
             >

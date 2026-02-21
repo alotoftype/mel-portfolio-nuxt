@@ -86,6 +86,12 @@ export default defineNuxtConfig({
   },
 
   runtimeConfig: {
+    sanityApiToken: process.env.SANITY_API_TOKEN || "",
+    resendApiKey: process.env.RESEND_API_KEY || "",
+    contactNotificationEmail:
+      process.env.CONTACT_NOTIFICATION_EMAIL || "melshotya@gmail.com",
+    contactFromEmail: process.env.CONTACT_FROM_EMAIL || "onboarding@resend.dev",
+    contactReplyToEmail: process.env.CONTACT_REPLY_TO_EMAIL || "",
     public: {
       sanityProjectId,
       sanityDataset,

@@ -17,6 +17,12 @@ const blogPostQuery = `*[_type == "blogPost" && slug.current == $slug][0] {
   categories,
   tags,
   excerpt,
+  seo {
+    metaTitle,
+    metaDescription,
+    "ogImage": ogImage.asset->url,
+    noIndex
+  },
   "thumbnail": thumbnail.asset->url,
   body
 }`
@@ -68,9 +74,27 @@ function postDataAttr(path?: string) {
   return encodeDataAttribute(path)
 }
 
-useHead({
-  title: `${post.title} — MelShotya Blog`,
-})
+const blogSeoTitle = computed(() => post.seo?.metaTitle || `${post.title} — MelShotya Blog`)
+const blogSeoDescription = computed(() =>
+  post.seo?.metaDescription ||
+  post.excerpt ||
+  `Read ${post.title} on the MelShotya blog.`
+)
+const blogSeoImage = computed(() => post.seo?.ogImage || thumbnailImage.value || undefined)
+const blogSeoRobots = computed(() => (post.seo?.noIndex ? 'noindex, nofollow' : undefined))
+
+useHead(() => ({
+  title: blogSeoTitle.value,
+}))
+
+useSeoMeta(() => ({
+  description: blogSeoDescription.value,
+  ogTitle: blogSeoTitle.value,
+  ogDescription: blogSeoDescription.value,
+  ogImage: blogSeoImage.value,
+  twitterImage: blogSeoImage.value,
+  robots: blogSeoRobots.value,
+}))
 </script>
 
 <template>

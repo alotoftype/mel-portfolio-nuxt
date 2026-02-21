@@ -7,6 +7,14 @@ const portfolioItems = await getPortfolioItems()
 useHead({
   title: 'Portfolio — MelShotya Photography',
 })
+
+useSeoMeta({
+  description:
+    'Browse the MelShotya portfolio featuring engagement shoots, portraits, fashion editorials, and event photography.',
+  ogTitle: 'Portfolio — MelShotya Photography',
+  ogDescription:
+    'Browse the MelShotya portfolio featuring engagement shoots, portraits, fashion editorials, and event photography.',
+})
 </script>
 
 <template>

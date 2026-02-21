@@ -43,6 +43,14 @@ function closeVideo() {
 useHead({
   title: 'Video Gallery — MelShotya Photography',
 })
+
+useSeoMeta({
+  description:
+    'Watch cinematic highlight reels and behind-the-scenes videos from MelShotya photography sessions.',
+  ogTitle: 'Video Gallery — MelShotya Photography',
+  ogDescription:
+    'Watch cinematic highlight reels and behind-the-scenes videos from MelShotya photography sessions.',
+})
 </script>
 
 <template>

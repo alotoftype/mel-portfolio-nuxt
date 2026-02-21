@@ -5,17 +5,16 @@
   "main": "package.json",
   "license": "UNLICENSED",
   "scripts": {
-    "dev": "sanity dev",
-    "start": "sanity start",
-    "build": "sanity build",
-    "deploy": "sanity deploy",
+    "dev": "node ./node_modules/sanity/node_modules/@sanity/cli/bin/sanity dev",
+    "start": "node ./node_modules/sanity/node_modules/@sanity/cli/bin/sanity start",
+    "build": "node ./node_modules/sanity/node_modules/@sanity/cli/bin/sanity build",
+    "deploy": "node ./node_modules/sanity/node_modules/@sanity/cli/bin/sanity deploy",
     "migrate": "node scripts/migrate-json-to-sanity.mjs",
     "list-images": "node scripts/list-required-images.mjs",
     "upload-images": "node scripts/upload-images-to-sanity.mjs",
     "setup-nav": "node scripts/setup-navigation.mjs"
   },
   "dependencies": {
-    "@sanity/cli": "",
     "@sanity/client": "^7.3.0",
     "@sanity/icons": "^3.5.0",
     "@sanity/image-url": "^1.1.0",

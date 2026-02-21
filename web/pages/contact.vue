@@ -1,4 +1,32 @@
 <script setup lang="ts">
+type TemplateKey = 'bookSession' | 'generalInquiry' | 'custom'
+type SubjectType = '' | 'book-session' | 'general-inquiry' | 'user-input'
+type SubjectOption = Exclude<SubjectType, ''>
+
+const SUBJECT_OPTIONS: Array<{ value: SubjectOption, label: string, templateKey: TemplateKey }> = [
+  { value: 'book-session', label: 'Book a Session', templateKey: 'bookSession' },
+  { value: 'general-inquiry', label: 'General Inquiry', templateKey: 'generalInquiry' },
+  { value: 'user-input', label: 'Custom Subject', templateKey: 'custom' },
+]
+
+const DEFAULT_RESPONSE_TEMPLATES: Record<TemplateKey, { title: string, message: string }> = {
+  bookSession: {
+    title: 'Session Request Received',
+    message:
+      'Thanks for reaching out about booking a session. We received your request and will follow up shortly.',
+  },
+  generalInquiry: {
+    title: 'Inquiry Received',
+    message:
+      'Thank you for your message. We received your inquiry and will get back to you soon.',
+  },
+  custom: {
+    title: 'Message Received',
+    message:
+      'Thanks for contacting us. Your message was sent successfully and we will respond as soon as possible.',
+  },
+}
+
 const { getContactData, isSanityConfigured } = useSanityData()
 useScrollAnimation()
 
@@ -6,6 +34,26 @@ const contactData = await getContactData()
 const contactQuery = `*[_type == "contactPage"][0] {
   title,
   formTitle,
+  seo {
+    metaTitle,
+    metaDescription,
+    "ogImage": ogImage.asset->url,
+    noIndex
+  },
+  responseTemplates {
+    bookSession {
+      title,
+      message
+    },
+    generalInquiry {
+      title,
+      message
+    },
+    custom {
+      title,
+      message
+    }
+  },
   contactItems[] {
     _key,
     title,
@@ -19,11 +67,34 @@ const contactQueryResult = isSanityConfigured
 const formState = reactive({
   name: '',
   email: '',
-  subject: '',
+  subjectType: '' as SubjectType,
+  customSubject: '',
   message: '',
 })
 const isSubmitting = ref(false)
 const submitStatus = ref<'idle' | 'success' | 'error'>('idle')
+const subjectTypeError = ref('')
+const customSubjectError = ref('')
+const submittedSubject = ref('')
+const submittedTemplateKey = ref<TemplateKey>('bookSession')
+
+const selectedSubjectOption = computed(() =>
+  SUBJECT_OPTIONS.find((option) => option.value === formState.subjectType)
+)
+const selectedTemplateKey = computed<TemplateKey>(() => selectedSubjectOption.value?.templateKey || 'custom')
+const selectedSubjectText = computed(() => {
+  if (formState.subjectType === 'user-input') {
+    return formState.customSubject.trim()
+  }
+  return selectedSubjectOption.value?.label || ''
+})
+const activeResponseTemplate = computed(() => {
+  const sanityTemplate = contactData.responseTemplates?.[submittedTemplateKey.value]
+  return {
+    title: sanityTemplate?.title || DEFAULT_RESPONSE_TEMPLATES[submittedTemplateKey.value].title,
+    message: sanityTemplate?.message || DEFAULT_RESPONSE_TEMPLATES[submittedTemplateKey.value].message,
+  }
+})
 
 function contactDataAttr(path?: string) {
   if (!path) return undefined
@@ -38,26 +109,59 @@ function contactItemPath(item: any, index: number, field?: string) {
   return field ? `${basePath}.${field}` : basePath
 }
 
+function responseTemplatePath(key: TemplateKey, field?: 'title' | 'message') {
+  const basePath = `responseTemplates.${key}`
+  return field ? `${basePath}.${field}` : basePath
+}
+
+function resetForm() {
+  formState.name = ''
+  formState.email = ''
+  formState.subjectType = ''
+  formState.customSubject = ''
+  formState.message = ''
+  subjectTypeError.value = ''
+  customSubjectError.value = ''
+}
+
 async function handleSubmit() {
   isSubmitting.value = true
   submitStatus.value = 'idle'
+  subjectTypeError.value = ''
+  customSubjectError.value = ''
+
+  if (!formState.subjectType) {
+    subjectTypeError.value = 'Please select a subject.'
+    isSubmitting.value = false
+    return
+  }
+
+  const resolvedSubject = selectedSubjectText.value
+  if (formState.subjectType === 'user-input' && !resolvedSubject) {
+    customSubjectError.value = 'Please enter a subject line.'
+    isSubmitting.value = false
+    return
+  }
+
+  const payload = {
+    name: formState.name.trim(),
+    email: formState.email.trim(),
+    subject: resolvedSubject,
+    subjectType: formState.subjectType,
+    message: formState.message.trim(),
+  }
 
   try {
-    // POST to getform.io (same endpoint as original project)
-    const response = await fetch(
-      contactData.formEndpoint,
-      {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formState),
-      }
-    )
+    const response = await fetch('/api/contact', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    })
     if (response.ok) {
+      submittedSubject.value = resolvedSubject
+      submittedTemplateKey.value = selectedTemplateKey.value
       submitStatus.value = 'success'
-      formState.name = ''
-      formState.email = ''
-      formState.subject = ''
-      formState.message = ''
+      resetForm()
     } else {
       submitStatus.value = 'error'
     }
@@ -68,9 +172,27 @@ async function handleSubmit() {
   }
 }
 
-useHead({
-  title: 'Contact — MelShotya Photography',
-})
+const contactSeoTitle = computed(() => contactData.seo?.metaTitle || 'Contact — MelShotya Photography')
+const contactSeoDescription = computed(() =>
+  contactData.seo?.metaDescription ||
+  contactData.title ||
+  'Contact MelShotya Photography for sessions and inquiries.'
+)
+const contactSeoImage = computed(() => contactData.seo?.ogImage || undefined)
+const contactSeoRobots = computed(() => (contactData.seo?.noIndex ? 'noindex, nofollow' : undefined))
+
+useHead(() => ({
+  title: contactSeoTitle.value,
+}))
+
+useSeoMeta(() => ({
+  description: contactSeoDescription.value,
+  ogTitle: contactSeoTitle.value,
+  ogDescription: contactSeoDescription.value,
+  ogImage: contactSeoImage.value,
+  twitterImage: contactSeoImage.value,
+  robots: contactSeoRobots.value,
+}))
 </script>
 
 <template>
@@ -118,14 +240,35 @@ useHead({
         </h2>
 
         <!-- Success message -->
-        <div v-if="submitStatus === 'success'" class="text-center py-12">
+        <div
+          v-if="submitStatus === 'success'"
+          class="text-center py-12"
+          role="status"
+          aria-live="polite"
+        >
           <div class="w-16 h-16 rounded-full bg-green-50 flex items-center justify-center mx-auto mb-4">
             <svg class="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
             </svg>
           </div>
-          <h3 class="font-display text-xl text-ink-800 mb-2">Message Sent</h3>
-          <p class="text-sm text-ink-500 font-body">Thank you! We'll get back to you soon.</p>
+          <p class="text-2xs uppercase tracking-widest-xl text-green-700 font-body mb-2">
+            Message Sent
+          </p>
+          <h3
+            class="font-display text-xl text-ink-800 mb-2"
+            :data-sanity="contactDataAttr(responseTemplatePath(submittedTemplateKey, 'title'))"
+          >
+            {{ activeResponseTemplate.title }}
+          </h3>
+          <p
+            class="text-sm text-ink-500 font-body max-w-lg mx-auto"
+            :data-sanity="contactDataAttr(responseTemplatePath(submittedTemplateKey, 'message'))"
+          >
+            {{ activeResponseTemplate.message }}
+          </p>
+          <p class="mt-4 text-2xs uppercase tracking-widest-xl text-ink-400 font-body">
+            Subject: {{ submittedSubject }}
+          </p>
           <button
             @click="submitStatus = 'idle'"
             class="mt-6 text-xs uppercase tracking-widest-xl text-ink-500 font-body hover:text-ink-900 transition-colors"
@@ -165,17 +308,53 @@ useHead({
           </div>
 
           <div class="animate-on-scroll">
-            <label for="subject" class="block text-2xs uppercase tracking-widest-xl text-ink-400 font-body mb-2">
+            <label for="subjectType" class="block text-2xs uppercase tracking-widest-xl text-ink-400 font-body mb-2">
               Subject
             </label>
-            <input
-              id="subject"
-              v-model="formState.subject"
-              type="text"
+            <select
+              id="subjectType"
+              v-model="formState.subjectType"
               required
+              :aria-invalid="subjectTypeError ? 'true' : 'false'"
+              class="w-full bg-transparent border-b border-ink-200 py-3 text-sm font-body text-ink-800 focus:border-ink-900 focus:outline-none transition-colors"
+              @change="subjectTypeError = ''"
+            >
+              <option value="" disabled>
+                Select a subject
+              </option>
+              <option
+                v-for="option in SUBJECT_OPTIONS"
+                :key="option.value"
+                :value="option.value"
+              >
+                {{ option.label }}
+              </option>
+            </select>
+            <p v-if="subjectTypeError" class="mt-2 text-sm text-red-600 font-body">
+              {{ subjectTypeError }}
+            </p>
+          </div>
+
+          <div v-if="formState.subjectType === 'user-input'" class="animate-on-scroll">
+            <label for="customSubject" class="block text-2xs uppercase tracking-widest-xl text-ink-400 font-body mb-2">
+              Custom Subject
+            </label>
+            <input
+              id="customSubject"
+              v-model="formState.customSubject"
+              type="text"
+              :required="formState.subjectType === 'user-input'"
               class="w-full bg-transparent border-b border-ink-200 py-3 text-sm font-body text-ink-800 placeholder:text-ink-300 focus:border-ink-900 focus:outline-none transition-colors"
-              placeholder="What is this about?"
+              placeholder="Enter your subject line"
+              :aria-invalid="customSubjectError ? 'true' : 'false'"
+              @input="customSubjectError = ''"
             />
+            <p class="mt-2 text-xs text-ink-400 font-body">
+              Type your own subject line here.
+            </p>
+            <p v-if="customSubjectError" class="mt-2 text-sm text-red-600 font-body">
+              {{ customSubjectError }}
+            </p>
           </div>
 
           <div class="animate-on-scroll">
@@ -193,7 +372,7 @@ useHead({
           </div>
 
           <!-- Error -->
-          <p v-if="submitStatus === 'error'" class="text-sm text-red-600 font-body text-center">
+          <p v-if="submitStatus === 'error'" class="text-sm text-red-600 font-body text-center" role="alert">
             Something went wrong. Please try again or email us directly.
           </p>
 

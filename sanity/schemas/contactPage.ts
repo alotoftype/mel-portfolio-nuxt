@@ -26,6 +26,77 @@ export default defineType({
       type: 'url',
     }),
     defineField({
+      name: 'responseTemplates',
+      title: 'Submission Success Templates',
+      description: 'Messages shown after a successful submission for each subject type',
+      type: 'object',
+      fields: [
+        defineField({
+          name: 'bookSession',
+          title: 'Book a Session',
+          type: 'object',
+          fields: [
+            defineField({
+              name: 'title',
+              title: 'Title',
+              type: 'string',
+              initialValue: 'Session Request Received',
+            }),
+            defineField({
+              name: 'message',
+              title: 'Message',
+              type: 'text',
+              rows: 3,
+              initialValue:
+                'Thanks for reaching out about booking a session. We received your request and will follow up shortly.',
+            }),
+          ],
+        }),
+        defineField({
+          name: 'generalInquiry',
+          title: 'General Inquiry',
+          type: 'object',
+          fields: [
+            defineField({
+              name: 'title',
+              title: 'Title',
+              type: 'string',
+              initialValue: 'Inquiry Received',
+            }),
+            defineField({
+              name: 'message',
+              title: 'Message',
+              type: 'text',
+              rows: 3,
+              initialValue:
+                'Thank you for your message. We received your inquiry and will get back to you soon.',
+            }),
+          ],
+        }),
+        defineField({
+          name: 'custom',
+          title: 'User Input Subject',
+          type: 'object',
+          fields: [
+            defineField({
+              name: 'title',
+              title: 'Title',
+              type: 'string',
+              initialValue: 'Message Received',
+            }),
+            defineField({
+              name: 'message',
+              title: 'Message',
+              type: 'text',
+              rows: 3,
+              initialValue:
+                'Thanks for contacting us. Your message was sent successfully and we will respond as soon as possible.',
+            }),
+          ],
+        }),
+      ],
+    }),
+    defineField({
       name: 'contactItems',
       title: 'Contact Info Cards',
       type: 'array',
@@ -65,6 +136,11 @@ export default defineType({
           },
         }),
       ],
+    }),
+    defineField({
+      name: 'seo',
+      title: 'SEO',
+      type: 'seo',
     }),
   ],
   preview: {

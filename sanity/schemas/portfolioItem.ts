@@ -27,6 +27,11 @@ export default defineType({
       rows: 2,
     }),
     defineField({
+      name: 'seo',
+      title: 'SEO',
+      type: 'seo',
+    }),
+    defineField({
       name: 'categories',
       title: 'Categories',
       type: 'array',
