@@ -3,7 +3,7 @@ let hasWarnedAboutFallback = false
 
 function getErrorCode(error: unknown) {
   const maybeError = error as { code?: string; cause?: { code?: string } }
-  return maybeError?.code || maybeError?.cause?.code || ''
+  return String(maybeError?.code ?? maybeError?.cause?.code ?? '')
 }
 
 function getErrorMessage(error: unknown) {
