@@ -30,3 +30,6 @@ sanity/.sanity/
 
 # Logs
 *.log
+
+# Local Netlify folder
+.netlify
