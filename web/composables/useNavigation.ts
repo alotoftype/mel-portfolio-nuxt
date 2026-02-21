@@ -1,7 +1,6 @@
 /**
  * Composable for fetching navigation data from Sanity
  */
-import { sanityFetchWithTimeout } from '~/composables/useSanityFetch'
 import { canUseSanityInProcess, handleSanityFetchError } from '~/composables/useSanityFallback'
 
 export interface NavigationItem {
@@ -21,12 +20,20 @@ export interface Navigation {
 }
 
 export function useNavigation() {
-  const nuxtApp = useNuxtApp()
   const config = useRuntimeConfig()
   const isSanityConfigured =
     !config.public.sanityForceFallback &&
     config.public.sanityProjectId !== 'your-project-id'
-  const sanityClient = nuxtApp.$sanityClient
+  const sanityClient = isSanityConfigured ? useSanity() : null
+
+  async function fetchSanityQuery<T>(
+    query: string,
+    params: Record<string, unknown> = {}
+  ): Promise<T | null> {
+    const { data, error } = await useSanityQuery<T>(query, params)
+    if (error.value) throw error.value
+    return data.value || null
+  }
 
   /**
    * Fetch all navigation areas
@@ -47,7 +54,7 @@ export function useNavigation() {
           showFullSocialNames,
           enabled
         }`
-        const data = await sanityFetchWithTimeout<Navigation[]>(sanityClient, query)
+        const data = await fetchSanityQuery<Navigation[]>(query)
         if (data?.length) return data
       } catch (e) {
         handleSanityFetchError('Fetching all navigation', e)
@@ -79,7 +86,7 @@ export function useNavigation() {
           showFullSocialNames,
           enabled
         }`
-        const data = await sanityFetchWithTimeout<Navigation | null>(sanityClient, query, { location })
+        const data = await fetchSanityQuery<Navigation | null>(query, { location })
         if (data) return data
       } catch (e) {
         handleSanityFetchError(`Fetching navigation for ${location}`, e)

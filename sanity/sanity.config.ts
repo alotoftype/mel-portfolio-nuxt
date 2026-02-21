@@ -1,7 +1,13 @@
 import { defineConfig } from 'sanity'
 import { structureTool } from 'sanity/structure'
 import { visionTool } from '@sanity/vision'
+import { defineDocuments, defineLocations, presentationTool } from 'sanity/presentation'
 import { schemaTypes } from './schemas'
+
+const previewUrl =
+  process.env.SANITY_STUDIO_PREVIEW_URL ||
+  process.env.SANITY_STUDIO_FRONTEND_URL ||
+  'http://localhost:3000'
 
 export default defineConfig({
   name: 'mel-portfolio',
@@ -12,6 +18,92 @@ export default defineConfig({
   dataset: process.env.SANITY_STUDIO_DATASET || 'production',
 
   plugins: [
+    presentationTool({
+      previewUrl: {
+        initial: previewUrl,
+        previewMode: {
+          enable: '/preview/enable',
+        },
+      },
+      resolve: {
+        mainDocuments: defineDocuments([
+          { route: '/', type: 'homePage' },
+          { route: '/about', type: 'aboutPage' },
+          { route: '/contact', type: 'contactPage' },
+          {
+            route: '/portfolio/:slug',
+            filter: `_type == "portfolioItem" && slug.current == $slug`,
+          },
+          {
+            route: '/blog/:slug',
+            filter: `_type == "blogPost" && slug.current == $slug`,
+          },
+        ]),
+        locations: {
+          homePage: defineLocations({
+            locations: [{ title: 'Home', href: '/' }],
+          }),
+          aboutPage: defineLocations({
+            locations: [{ title: 'About', href: '/about' }],
+          }),
+          contactPage: defineLocations({
+            locations: [{ title: 'Contact', href: '/contact' }],
+          }),
+          siteSettings: defineLocations({
+            message: 'Site settings are used across multiple pages.',
+            locations: [
+              { title: 'Home', href: '/' },
+              { title: 'About', href: '/about' },
+              { title: 'Portfolio', href: '/portfolio' },
+              { title: 'Blog', href: '/blog' },
+              { title: 'Contact', href: '/contact' },
+            ],
+          }),
+          navigation: defineLocations({
+            message: 'Navigation appears throughout the site.',
+            locations: [
+              { title: 'Home', href: '/' },
+              { title: 'About', href: '/about' },
+              { title: 'Portfolio', href: '/portfolio' },
+              { title: 'Blog', href: '/blog' },
+              { title: 'Contact', href: '/contact' },
+            ],
+          }),
+          portfolioItem: defineLocations({
+            select: {
+              title: 'title',
+              slug: 'slug.current',
+            },
+            resolve: (doc) => {
+              if (!doc?.slug) return null
+
+              return {
+                locations: [
+                  { title: doc.title || 'Portfolio item', href: `/portfolio/${doc.slug}` },
+                  { title: 'Portfolio', href: '/portfolio' },
+                ],
+              }
+            },
+          }),
+          blogPost: defineLocations({
+            select: {
+              title: 'title',
+              slug: 'slug.current',
+            },
+            resolve: (doc) => {
+              if (!doc?.slug) return null
+
+              return {
+                locations: [
+                  { title: doc.title || 'Blog post', href: `/blog/${doc.slug}` },
+                  { title: 'Blog', href: '/blog' },
+                ],
+              }
+            },
+          }),
+        },
+      },
+    }),
     structureTool({
       structure: (S) =>
         S.list()

@@ -12,7 +12,6 @@ import portfolioData from '~/data/portfolio.json'
 import aboutData from '~/data/about.json'
 import contactCardsData from '~/data/contact.json'
 import blogData from '~/data/blog.json'
-import { sanityFetchWithTimeout } from '~/composables/useSanityFetch'
 import { canUseSanityInProcess, handleSanityFetchError } from '~/composables/useSanityFallback'
 
 function normalizeAssetPath(path?: string) {
@@ -111,24 +110,29 @@ function normalizeLegacyAboutData(data: any[]) {
 }
 
 export function useSanityData() {
-  const nuxtApp = useNuxtApp()
   const config = useRuntimeConfig()
   const isSanityConfigured =
     !config.public.sanityForceFallback &&
     config.public.sanityProjectId !== 'your-project-id'
 
-  // Get sanity client from the plugin
-  const sanityClient = nuxtApp.$sanityClient
+  const sanityClient = isSanityConfigured ? useSanity() : null
+
+  async function fetchSanityQuery<T>(
+    query: string,
+    params: Record<string, unknown> = {}
+  ): Promise<T | null> {
+    const { data, error } = await useSanityQuery<T>(query, params)
+    if (error.value) throw error.value
+    return data.value || null
+  }
 
   /**
    * Fetch portfolio items from Sanity, or fall back to local JSON
    */
   async function getPortfolioItems() {
-    // Use Nuxt's built-in caching
-    const { data } = await useAsyncData('portfolio-items', async () => {
-      if (isSanityConfigured && sanityClient && canUseSanityInProcess()) {
-        try {
-          const query = `*[_type == "portfolioItem"] | order(order asc) {
+    if (isSanityConfigured && sanityClient && canUseSanityInProcess()) {
+      try {
+        const query = `*[_type == "portfolioItem"] | order(order asc) {
             _id,
             title,
             "slug": slug.current,
@@ -147,31 +151,26 @@ export function useSanityData() {
               "url": asset->url
             }
           }`
-          const result = await sanityFetchWithTimeout<any[]>(sanityClient, query)
-          if (result?.length) {
-            return result.map((item: any, index: number) => normalizePortfolioItem(item, index))
-          }
-        } catch (e) {
-          handleSanityFetchError('Fetching portfolio items', e)
+        const result = await fetchSanityQuery<any[]>(query)
+        if (result?.length) {
+          return result.map((item: any, index: number) => normalizePortfolioItem(item, index))
         }
+      } catch (e) {
+        handleSanityFetchError('Fetching portfolio items', e)
       }
-      // Fallback: map local JSON to consistent shape
-      return portfolioData.map((item: any, index: number) =>
-        normalizePortfolioItem(
-          {
-            ...item,
-            homeImage: normalizeAssetPath(item.homeImage),
-            slug: String(item.id),
-          },
-          index
-        )
-      )
-    }, {
-      // Cache for 5 minutes
-      getCachedData: (key) => nuxtApp.payload.data[key] || nuxtApp.static.data[key]
-    })
+    }
 
-    return data.value || []
+    // Fallback: map local JSON to consistent shape
+    return portfolioData.map((item: any, index: number) =>
+      normalizePortfolioItem(
+        {
+          ...item,
+          homeImage: normalizeAssetPath(item.homeImage),
+          slug: String(item.id),
+        },
+        index
+      )
+    )
   }
 
   /**
@@ -199,7 +198,7 @@ export function useSanityData() {
               "url": asset->url
             }
           }`
-        const data = await sanityFetchWithTimeout<any>(sanityClient, query, { slug: slugOrId })
+        const data = await fetchSanityQuery<any>(query, { slug: slugOrId })
         if (data) return normalizePortfolioItem(data)
       } catch (e) {
         handleSanityFetchError('Fetching portfolio item', e)
@@ -220,10 +219,9 @@ export function useSanityData() {
    * Fetch homepage data (slider, quote)
    */
   async function getHomeData() {
-    const { data } = await useAsyncData('home-data', async () => {
-      if (isSanityConfigured && sanityClient && canUseSanityInProcess()) {
-        try {
-          const query = `*[_type == "homePage"][0] {
+    if (isSanityConfigured && sanityClient && canUseSanityInProcess()) {
+      try {
+        const query = `*[_type == "homePage"][0] {
             slider[] {
               _key,
               title,
@@ -237,29 +235,25 @@ export function useSanityData() {
             ctaTitle,
             ctaSubtitle
           }`
-          const result = await sanityFetchWithTimeout<any>(sanityClient, query)
-          if (result && result.slider) {
-            return result
-          }
-        } catch (e) {
-          handleSanityFetchError('Fetching home page data', e)
+        const result = await fetchSanityQuery<any>(query)
+        if (result && result.slider) {
+          return result
         }
+      } catch (e) {
+        handleSanityFetchError('Fetching home page data', e)
       }
-      return {
-        slider: (homeData[0] as any).slider.map((s: any) => ({
-          title: s.title,
-          subtitle: s.subTitle,
-          image: normalizeAssetPath(s.backgroundImage),
-          buttonText: s.buttonText,
-          link: '/portfolio',
-        })),
-        quote: (homeData[1] as any).qute,
-      }
-    }, {
-      getCachedData: (key) => nuxtApp.payload.data[key] || nuxtApp.static.data[key]
-    })
+    }
 
-    return data.value || { slider: [], quote: '' }
+    return {
+      slider: (homeData[0] as any).slider.map((s: any) => ({
+        title: s.title,
+        subtitle: s.subTitle,
+        image: normalizeAssetPath(s.backgroundImage),
+        buttonText: s.buttonText,
+        link: '/portfolio',
+      })),
+      quote: (homeData[1] as any).qute,
+    }
   }
 
   /**
@@ -297,7 +291,7 @@ export function useSanityData() {
             "logo": logo.asset->url
           }
         }`
-        const data = await sanityFetchWithTimeout<any>(sanityClient, query)
+        const data = await fetchSanityQuery<any>(query)
         if (data) {
           return [
             {
@@ -379,7 +373,7 @@ export function useSanityData() {
             content
           }
         }`
-        const data = await sanityFetchWithTimeout<any>(sanityClient, query)
+        const data = await fetchSanityQuery<any>(query)
         if (data?.contactItems) {
           return {
             title: data.title || defaultContactData.title,
@@ -421,7 +415,7 @@ export function useSanityData() {
           },
           tags
         }`
-        const data = await sanityFetchWithTimeout<any[]>(sanityClient, query)
+        const data = await fetchSanityQuery<any[]>(query)
         if (data?.length) {
           return data.map((post: any, index: number) => ({
             ...post,

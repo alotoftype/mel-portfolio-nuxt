@@ -1,6 +1,14 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
 const isDev = process.env.NODE_ENV !== "production";
 const usePolling = process.env.CHOKIDAR_USEPOLLING === "true";
+const isrSeconds = Number(process.env.NUXT_ISR_SECONDS || 60);
+const sanityProjectId = process.env.SANITY_PROJECT_ID || "your-project-id";
+const sanityDataset = process.env.SANITY_DATASET || "production";
+const sanityStudioUrl =
+  process.env.SANITY_STUDIO_URL ||
+  process.env.SANITY_STUDIO_PREVIEW_URL ||
+  "http://localhost:3333";
+const visualEditingEnabled = Boolean(process.env.SANITY_API_TOKEN && sanityStudioUrl);
 
 export default defineNuxtConfig({
   compatibilityDate: "2024-11-01",
@@ -9,7 +17,23 @@ export default defineNuxtConfig({
     public: "../public",
   },
 
-  modules: ["@nuxt/image", "@nuxtjs/tailwindcss", "@nuxt/eslint"],
+  modules: ["@nuxt/image", "@nuxtjs/tailwindcss", "@nuxt/eslint", "@nuxtjs/sanity"],
+
+  sanity: {
+    projectId: sanityProjectId === "your-project-id" ? "" : sanityProjectId,
+    dataset: sanityDataset,
+    apiVersion: "2024-01-01",
+    useCdn: true,
+    visualEditing: visualEditingEnabled
+      ? {
+          token: process.env.SANITY_API_TOKEN,
+          studioUrl: sanityStudioUrl,
+          mode: "live-visual-editing",
+          previewMode: true,
+          stega: true,
+        }
+      : undefined,
+  },
 
   image: {
     // `none` in dev makes local interaction faster by skipping on-the-fly IPX transforms.
@@ -62,20 +86,25 @@ export default defineNuxtConfig({
   },
 
   runtimeConfig: {
-    sanityToken: process.env.SANITY_API_TOKEN || "",
     public: {
-      sanityProjectId: process.env.SANITY_PROJECT_ID || "your-project-id",
-      sanityDataset: process.env.SANITY_DATASET || "production",
+      sanityProjectId,
+      sanityDataset,
       sanityForceFallback: process.env.SANITY_FORCE_FALLBACK === "true",
       sanityFetchTimeoutMs: Number(process.env.SANITY_FETCH_TIMEOUT_MS || 1200),
+      sanityStudioUrl,
+      siteUrl: process.env.NUXT_PUBLIC_SITE_URL || "http://localhost:3000",
     },
   },
 
   routeRules: {
-    "/": { prerender: true },
-    "/about": { prerender: true },
-    "/portfolio": { prerender: true },
-    "/contact": { prerender: true },
+    "/": { isr: isrSeconds },
+    "/about": { isr: isrSeconds },
+    "/contact": { isr: isrSeconds },
+    "/portfolio": { isr: isrSeconds },
+    "/portfolio/**": { isr: isrSeconds },
+    "/blog": { isr: isrSeconds },
+    "/blog/**": { isr: isrSeconds },
+    "/video-gallery": { isr: isrSeconds },
   },
 
   vite: {
@@ -87,14 +116,6 @@ export default defineNuxtConfig({
         "react-compiler-runtime",
         "styled-components",
       ],
-    },
-    resolve: {
-      alias: {
-        // Prevent React from being loaded in Nuxt
-        'react': 'vue',
-        'react-dom': 'vue',
-        'react-compiler-runtime': false,
-      },
     },
     server: {
       watch: {
@@ -115,6 +136,7 @@ export default defineNuxtConfig({
   },
 
   nitro: {
+    preset: process.env.NITRO_PRESET || (process.env.NETLIFY ? "netlify" : undefined),
     storage: {
       cache: {
         driver: "memory",

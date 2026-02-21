@@ -33,3 +33,4 @@ sanity/.sanity/
 
 # Local Netlify folder
 .netlify
+**/.netlify

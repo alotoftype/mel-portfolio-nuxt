@@ -6,7 +6,10 @@
     "dev": "concurrently \"npm run dev:web\" \"npm run dev:sanity\"",
     "dev:web": "cd web && npm run dev",
     "dev:sanity": "cd sanity && npm run dev",
-    "install:all": "npm install && cd web && npm install && cd ../sanity && npm install"
+    "install:all": "npm install && cd web && npm install && cd ../sanity && npm install",
+    "deploy:web": "./deploy-web.sh",
+    "deploy:studio": "./deploy-sanity.sh",
+    "deploy": "npm run deploy:web && npm run deploy:studio"
   },
   "devDependencies": {
     "@tailwindcss/vite": "^4.0.0",
