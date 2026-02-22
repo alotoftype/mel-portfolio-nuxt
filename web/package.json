@@ -12,22 +12,22 @@
     "lint:fix": "eslint . --fix"
   },
   "dependencies": {
-    "@nuxt/image": "^1.9.0",
-    "@nuxtjs/sanity": "1.12.2",
-    "@sanity/client": "^7.3.0",
-    "@sanity/image-url": "^1.1.0",
-    "nuxt": "^3.15.0",
-    "vue": "^3.5.0",
-    "vue-router": "^4.5.0"
+    "@nuxt/image": "^2.0.0",
+    "@nuxt/kit": "^4.3.1",
+    "@nuxtjs/sanity": "2.2.0",
+    "@sanity/client": "^7.15.0",
+    "@sanity/image-url": "^2.0.3",
+    "nuxt": "^4.3.1",
+    "vue": "^3.5.28"
   },
   "devDependencies": {
-    "@nuxt/eslint": "^0.7.0",
-    "@nuxtjs/tailwindcss": "^6.12.2",
+    "@nuxt/eslint": "^1.15.1",
+    "@nuxtjs/tailwindcss": "^6.14.0",
     "@tailwindcss/typography": "^0.5.19",
-    "tailwindcss": "^3.4.17",
-    "typescript": "^5.7.0"
+    "tailwindcss": "^3.4.19",
+    "typescript": "^5.9.3"
   },
-  "overrides": {
-    "@nuxt/kit": "3.21.1"
+  "engines": {
+    "node": "^22.12.0 || >=24.0.0"
   }
 }

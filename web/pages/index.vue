@@ -36,6 +36,10 @@ const homeData = computed(() => {
   }
   return fallbackHomeData
 })
+const isUsingHomeQueryData = computed(() => {
+  const queryData = homeQueryResult?.data?.value
+  return Boolean(queryData && homeData.value === queryData)
+})
 
 const homeSeo = computed(() => homeData.value?.seo || {})
 const homeSeoTitle = computed(() => homeSeo.value.metaTitle || 'MelShotya Photography — Brooklyn, NY')
@@ -47,9 +51,14 @@ const homeSeoImage = computed(() => homeSeo.value.ogImage || homeData.value?.sli
 const homeSeoRobots = computed(() => (homeSeo.value.noIndex ? 'noindex, nofollow' : undefined))
 
 function homeDataAttr(path: string) {
+  if (!path || !isUsingHomeQueryData.value) return undefined
   const encodeDataAttribute = homeQueryResult?.encodeDataAttribute?.value
   if (!encodeDataAttribute) return undefined
-  return encodeDataAttribute(path)
+  try {
+    return encodeDataAttribute(path)
+  } catch {
+    return undefined
+  }
 }
 
 useHead(() => ({

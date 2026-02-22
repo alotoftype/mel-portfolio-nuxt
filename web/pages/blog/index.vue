@@ -47,7 +47,11 @@ function blogDataAttr(path?: string) {
   if (!path) return undefined
   const encodeDataAttribute = blogIndexQueryResult?.encodeDataAttribute?.value
   if (!encodeDataAttribute) return undefined
-  return encodeDataAttribute(path)
+  try {
+    return encodeDataAttribute(path)
+  } catch {
+    return undefined
+  }
 }
 
 function blogPostPath(index: number, field?: string) {

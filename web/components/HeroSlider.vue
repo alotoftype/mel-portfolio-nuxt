@@ -40,7 +40,11 @@ function buildSlidePath(slide?: Slide, index = 0) {
 
 function encodeDataAttribute(path?: string) {
   if (!path || !props.dataAttribute) return undefined
-  return props.dataAttribute(path)
+  try {
+    return props.dataAttribute(path)
+  } catch {
+    return undefined
+  }
 }
 
 function goToSlide(index: number) {

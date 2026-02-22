@@ -76,7 +76,11 @@ function aboutDataAttr(path?: string) {
   if (!path) return undefined
   const encodeDataAttribute = aboutQueryResult?.encodeDataAttribute?.value
   if (!encodeDataAttribute) return undefined
-  return encodeDataAttribute(path)
+  try {
+    return encodeDataAttribute(path)
+  } catch {
+    return undefined
+  }
 }
 
 function scopedArrayPath(arrayPath: string, item: any, index: number, field?: string) {

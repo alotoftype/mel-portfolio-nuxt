@@ -19,4 +19,9 @@ echo "File descriptor limit set to: $(ulimit -n)"
 echo "Starting Nuxt dev server..."
 
 export SANITY_STUDIO_URL="${SANITY_STUDIO_URL:-http://localhost:3333}"
+if [ ! -f "web/.nuxt/tsconfig.json" ]; then
+  echo "Preparing Nuxt types..."
+  (cd web && npm run postinstall)
+fi
+
 cd web && npm run dev -- --host localhost --port 3000

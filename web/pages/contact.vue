@@ -100,7 +100,11 @@ function contactDataAttr(path?: string) {
   if (!path) return undefined
   const encodeDataAttribute = contactQueryResult?.encodeDataAttribute?.value
   if (!encodeDataAttribute) return undefined
-  return encodeDataAttribute(path)
+  try {
+    return encodeDataAttribute(path)
+  } catch {
+    return undefined
+  }
 }
 
 function contactItemPath(item: any, index: number, field?: string) {

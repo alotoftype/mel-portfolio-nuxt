@@ -71,7 +71,11 @@ function postDataAttr(path?: string) {
   if (!path) return undefined
   const encodeDataAttribute = blogPostQueryResult?.encodeDataAttribute?.value
   if (!encodeDataAttribute) return undefined
-  return encodeDataAttribute(path)
+  try {
+    return encodeDataAttribute(path)
+  } catch {
+    return undefined
+  }
 }
 
 const blogSeoTitle = computed(() => post.seo?.metaTitle || `${post.title} — MelShotya Blog`)
